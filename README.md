@@ -2,6 +2,10 @@
 The files in the C++ folder are authored by authors of the original paper
 (Correa et al., 2021). The python folder includes our Python based implementation.
 
+# Run
+To run original c++ representation:
+g++ -std=c++11 -o main main.cc (not working yet)
+
 # Set up
 To allow for version control of jupyter notebooks, please run:
 
