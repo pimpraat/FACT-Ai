@@ -22,7 +22,7 @@ def one_color_secretary_algorithm(colored_candidates):
     max_probability = (max(np.array(list(colored_candidates.values()), dtype=object)[:,1]))
 
     for values in colored_candidates.values():
-        if values[1] == max_probability:
+        if values[1] == max_probability: # Overwrites for all p are equal, but that's the heuristic they set
             single_color = values[0]
             # print(single_color)
             
@@ -92,7 +92,7 @@ def multiple_color_thresholds(colors, probabilities):
     
     thresholds.insert(0, np.power((1 - (k - 1) * probabilities[-1]), 1 / (k - 1)))
     
-    for j in range(2, k):
+    for j in range(k-1, 1, -1):
 
         dividend = [probabilities[r-1]/(j-1) - probabilities[j-1] for r in range(1, j+1)]
         divisor = [probabilities[r-1]/(j-1) - probabilities[j] for r in range(1, j+1)]
@@ -103,6 +103,7 @@ def multiple_color_thresholds(colors, probabilities):
     unsort_index = [tuple[0] for tuple in sort_index]
     thresholds = [thresholds[i] for i in unsort_index]
     
+    print(thresholds)
     return thresholds
     
 if __name__ == "__main__":
