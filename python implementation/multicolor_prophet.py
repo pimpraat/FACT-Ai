@@ -102,7 +102,14 @@ def EHKS_algorithm(Values, distribution_type):
 # _Here, as mentioned in the paper, the "input stream consists of 50 samples from the uniform distribution in range [0, 1]"_
 
 # %%
+"""
+:param distribution_type: either "uniform" or "binomial"
+:param size: number of candidates
+:returns q: 
+:returns V:
+"""
 def generateDistribution(distribution_type, size):
+    n = size
     if distribution_type == "uniform":
         q, V = [1/n] * n , rng.uniform(low=0.0, high=1.0, size=n)
     elif distribution_type == "binomial":
@@ -110,12 +117,12 @@ def generateDistribution(distribution_type, size):
     return q,V
 
 """
-:param algorithm:
-:param N_experimentReps: 
-:param Values: values
-:param distribution_type:
-:param q: 
-:returns: arrivalPositionsChosen, chosenValues
+:param algorithm: string either "FairGeneralProphet", "FairIIDProphet", "SC", or "EHKS"
+:param N_experimentReps: the number of times the algorithm needs to run
+:param distribution_type: either "uniform" or "binomial"
+:param n_candidates: interger with the number of candidates in each experiment
+:returns arrivalPositionsChosen: array containing which candidate position was chosen
+:returns chosenValues: array contraining the values of each picked/selected candidate
 """
 def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
     arrivalPositionsChosen, chosenValues = [0]*n_candidates, []
