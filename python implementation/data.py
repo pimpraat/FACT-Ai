@@ -11,35 +11,25 @@ def create_data(colors, n, probabilities):
         
     return colored_candidates
 
-def get_synthetic_data():
+def get_synthetic_data(colors, n, probabilities):
     
-    colors = ['red', 'green', 'blue', 'yellow']
-    n = [10, 100, 1000, 10000]
+    synthetic_data = create_data(colors, n, probabilities)
     
-    probabilities = [0.25, 0.25, 0.25, 0.25]
-    synthetic_data_equal_p = create_data(colors, n, probabilities)
-    print(synthetic_data_equal_p)
-    
-    probabilities = [0.3, 0.25, 0.25, 0.2]
-    synthetic_data_diff_p = create_data(colors, n, probabilities)
-    print(synthetic_data_diff_p)
-    
-    return synthetic_data_equal_p, synthetic_data_diff_p
+    return synthetic_data
 
-def get_bank_data(path):
+def get_bank_data(path, probabilities):
     
     bank_data = pd.read_csv(path, sep = ';')
     feedback_max = bank_data[['age', 'duration']]
 
     colors = ['under 30', '31-40', '41-50', '51-60', 'over 60']
-    probability = 0.2
 
     colored_candidates = {
-        "under 30": [feedback_max.loc[feedback_max['age'] <= 30]['duration'].values, probability],
-        "31-40": [feedback_max.loc[(feedback_max['age'] > 30) & (feedback_max['age'] <= 40)]['duration'].values, probability],
-        "41-50": [feedback_max.loc[(feedback_max['age'] > 40) & (feedback_max['age'] <= 50)]['duration'].values, probability],
-        "51-60": [feedback_max.loc[(feedback_max['age'] > 50) & (feedback_max['age'] <= 60)]['duration'].values, probability],
-        "over 60": [feedback_max.loc[feedback_max['age'] > 60]['duration'].values, probability]
+        "under 30": [feedback_max.loc[feedback_max['age'] <= 30]['duration'].values, probabilities[0]],
+        "31-40": [feedback_max.loc[(feedback_max['age'] > 30) & (feedback_max['age'] <= 40)]['duration'].values, probabilities[1]],
+        "41-50": [feedback_max.loc[(feedback_max['age'] > 40) & (feedback_max['age'] <= 50)]['duration'].values, probabilities[2]],
+        "51-60": [feedback_max.loc[(feedback_max['age'] > 50) & (feedback_max['age'] <= 60)]['duration'].values, probabilities[3]],
+        "over 60": [feedback_max.loc[feedback_max['age'] > 60]['duration'].values, probabilities[4]]
     }
     
     return colored_candidates
@@ -59,9 +49,9 @@ def get_pokec_data(path):
     
 if __name__ == "__main__":
     
-    # synthetic_data_equal_p, synthetic_data_diff_p = get_synthetic_data()
+    # synthetic_data = get_synthetic_data()
 
-    # bank_data = get_bank_data(path = 'data/bank_raw.csv')
+    # bank_data = get_bank_data(path = 'data/bank_raw.csv', probability = 0.2)
     get_pokec_data(path = 'data/soc-pokec-profiles.txt')
     
     

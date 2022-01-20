@@ -3,7 +3,7 @@ from itertools import repeat
 import random
 from operator import itemgetter
 
-def secretary_algorithm(candidates):
+def secretary_algorithm(candidates, color_per_candidate, max_colors):
 
     stop_rule = round(len(candidates)/np.e)
 
@@ -16,53 +16,55 @@ def secretary_algorithm(candidates):
     except StopIteration:
         best_candidate = candidates[-1]
 
-    return best_candidate
+    winning_color = color_per_candidate[list(candidates).index(best_candidate)]
+        
+    return best_candidate, winning_color, best_candidate == max_colors[winning_color]
 
-def one_color_secretary_algorithm(colored_candidates):
+def one_color_secretary_algorithm(colored_candidates, color_per_candidate, max_colors):
     max_probability = (max(np.array(list(colored_candidates.values()), dtype=object)[:,1]))
 
-    for values in colored_candidates.values():
+    for key in colored_candidates.keys():
+        values = colored_candidates[key]
         if values[1] == max_probability: # Overwrites for all p are equal, but that's the heuristic they set
             single_color = values[0]
-            # print(single_color)
+            winning_color = key
             
-    best_candidate = secretary_algorithm(single_color)
+    best_candidate, color, max_color = secretary_algorithm(single_color, color_per_candidate, max_colors)
     
-    return best_candidate
+    return best_candidate, winning_color, best_candidate == max_colors[winning_color]
 
-def multiple_color_secretary_algorithm(colors, candidates, color_per_candidate, thresholds):
+def multiple_color_secretary_algorithm(colors, candidates, color_per_candidate, thresholds, n, max_colors):
 
-    n = 7
+    # print(n)
 
-    print(colors)
-    print(candidates)
-    print(color_per_candidate)
-    print(thresholds, '\n')
+    # print(candidates)
+    # print(color_per_candidate)
+    # print(thresholds, '\n')
     
-    max_C_j = [0, 0, 0]
+    max_C_j = [0]*len(colors)
     
-    stop_rule = [round(n*thresholds[i]) for i in range(len(thresholds))]
+    stop_rule = [round(n[i]*thresholds[i]) for i in range(len(thresholds))]
     
     for i in range(len(candidates)):
-        print(candidates[i])
+        # print(candidates[i])
         current_color = color_per_candidate[i]
-        print(current_color)
+        # print(current_color)
         
         if stop_rule[colors.index(current_color)] == 0 and candidates[i] > max_C_j[colors.index(current_color)]:
             print("FINAL CANDIDATE: ", candidates[i])
-            return candidates[i]
+            return candidates[i], current_color, candidates[i] == max_colors[current_color]
         
         elif candidates[i] > max_C_j[colors.index(current_color)]:
-            print("new max: ", candidates[i])
+            # print("new max: ", candidates[i])
             max_C_j[colors.index(current_color)] = candidates[i]
             stop_rule[colors.index(current_color)] -= 1
             
         elif stop_rule[colors.index(current_color)] != 0:
-            print("minus 1: ")
+            # print("minus 1: ")
             stop_rule[colors.index(current_color)] -= 1
            
-        print(stop_rule) 
-        print("\n")
+        # print(stop_rule) 
+        # print("\n")
     
     
 def create_data(n, colors, probabilities):
@@ -105,6 +107,15 @@ def multiple_color_thresholds(colors, probabilities):
     
     print(thresholds)
     return thresholds
+
+def shuffle_input(candidates, color_per_candidate):
+    
+    color_matching = list(zip(candidates, color_per_candidate))
+    random.shuffle(color_matching)
+    
+    candidates, color_per_candidate = zip(*color_matching)
+    
+    return candidates, color_per_candidate
     
 if __name__ == "__main__":
 
@@ -120,23 +131,13 @@ if __name__ == "__main__":
     print("Best candidate in SA: ", best_SA)
     print("Best candidate in SCSA: ", best_SCSA)
     
+    candidates, color_per_candidate = prepare_multicolor_input(candidates, colored_candidates)
     
-    print(candidates)
-    
-    color_per_candidate = []
-    color_per_candidate.extend(repeat("red", len(colored_candidates['red'][0])))
-    color_per_candidate.extend(repeat("green", len(colored_candidates['green'][0])))
-    color_per_candidate.extend(repeat("blue", len(colored_candidates['blue'][0])))
-    
-    color_matching = list(zip(candidates, color_per_candidate))
-    random.shuffle(color_matching)
-    
-    candidates, color_per_candidate = zip(*color_matching)
     
     print(candidates)
     print(color_per_candidate)
     
     thresholds = multiple_color_thresholds(colors, probabilities)
-    best_MCSA = multiple_color_secretary_algorithm(colors, candidates, color_per_candidate, thresholds)
+    best_MCSA = multiple_color_secretary_algorithm(colors, candidates, color_per_candidate, thresholds, n = [7, 7, 7])
     
     print("Best candidate in MCSA: ", best_MCSA)
