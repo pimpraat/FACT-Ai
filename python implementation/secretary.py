@@ -35,23 +35,27 @@ def one_color_secretary_algorithm(candidates_per_group, candidates_color, max_co
 def multiple_color_secretary_algorithm(all_candidates, candidates_color, max_colors, *args):
     
     colors, thresholds, n = args[0], args[1], args[2]
-    max_C_j = [0] * len(colors)
     
-    stop_rule = [round(n[i] * thresholds[i]) for i in range(len(thresholds))]
+#     for i in range(len(thresholds)):
+#         thresholds[i] = thresholds[i] * n[i]
+        
+    max_until_threshold = [0] * len(colors)
+    current_color_index = [0] * len(colors)
     
-    for i in range(len(all_candidates)):
+    for i in range(0, len(all_candidates)):
 
         current_color = candidates_color[i]
-        
-        if stop_rule[colors.index(current_color)] == 0 and all_candidates[i] > max_C_j[colors.index(current_color)]:
-            return all_candidates[i], current_color, all_candidates[i] == max_colors[current_color]
-        
-        elif all_candidates[i] > max_C_j[colors.index(current_color)]:
-            max_C_j[colors.index(current_color)] = all_candidates[i]
-            stop_rule[colors.index(current_color)] -= 1
-            
-        elif stop_rule[colors.index(current_color)] != 0:
-            stop_rule[colors.index(current_color)] -= 1
+        if current_color_index[colors.index(current_color)] < thresholds[colors.index(current_color)]:
+            max_until_threshold[colors.index(current_color)] = max(max_until_threshold[colors.index(current_color)], all_candidates[i])
+            current_color_index[colors.index(current_color)] += 1
+
+    for i in range(0, len(all_candidates)):
+
+        current_color = candidates_color[i]
+        if current_color_index[colors.index(current_color)] >= thresholds[colors.index(current_color)]:
+
+            if all_candidates[i] >= max_until_threshold[colors.index(current_color)]:
+                return all_candidates[i], current_color, all_candidates[i] == max_colors[current_color]
 
     return all_candidates[-1], current_color, all_candidates[-1] == max_colors[current_color]
 

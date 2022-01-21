@@ -27,6 +27,10 @@ def secretary_experiment(candidates_per_group, *args):
     all_candidates = np.concatenate([v[0] for v in candidates_per_group.values()])
     thresholds = multiple_color_thresholds(probabilities)
 
+    for i in range(len(thresholds)):
+        thresholds[i] = np.round(thresholds[i] * n[i])
+    print(thresholds)
+
     results_SA, results_SCSA, results_MCSA = [], [], []
     
     candidates_color = []
@@ -36,7 +40,11 @@ def secretary_experiment(candidates_per_group, *args):
         candidates_color.extend(repeat(color, len(candidates_per_group[color][0])))
         max_colors[color] = max(candidates_per_group[color][0])
 
-    for _ in range(20000):
+    for i in range(20000):
+        
+        if i % 1000 == 0:
+            print(i, "K")
+
         all_candidates, candidates_color = shuffle_input(all_candidates, candidates_color)
         result_SA = secretary_algorithm(all_candidates, candidates_color, max_colors)
         results_SA.append(result_SA)
