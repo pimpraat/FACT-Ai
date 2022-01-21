@@ -1,12 +1,13 @@
-import numpy as np
-from collections import Counter
+import pickle
+from secretary_experiments import synthetic_experiment, unbalanced_synthetic_experiment
 
-def evaluation(algorithm_name, results_SA, colors, n):
+if __name__ == "__main__":
     
-    chosen_scores = [item[0] for item in results_SA]
-    chosen_colors = [item[1] for item in results_SA]
-    is_max = [item[2] for item in results_SA]
+    results = synthetic_experiment()
+    results2 = unbalanced_synthetic_experiment()
     
-    print('\n', 'Algorithm', algorithm_name, '; Group sizes:', n)
-    print(Counter(chosen_colors))
-    print(Counter(is_max))
+    with open('python implementation/results_synthetic1.pickle', 'wb') as f:
+        pickle.dump(results, f)
+        
+    with open('python implementation/results_synthetic2.pickle', 'wb') as f:
+        pickle.dump(results2, f)
