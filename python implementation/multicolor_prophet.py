@@ -194,6 +194,75 @@ diff_solution_1000 = [
 # ## The two algorithms presented in the paper
 
 # %%
+# factorial of a number n
+def factorial(n) :
+     
+    fact = 1
+    for i in range(1, n+1) :
+        fact = fact * i
+ 
+    return fact;
+ 
+# Function to find middle term in
+# binomial expansion series.
+def findMiddleTerm(A, X, n) :
+ 
+    if (n % 2 == 0) :
+         
+        # If n is even
+         
+        # calculating the middle term
+        i = int(n / 2)
+ 
+        # calculating the value of A to
+        # the power k and X to the power k
+        aPow = int(math.pow(A, n - i))
+        xPow = int(math.pow(X, i))
+ 
+        middleTerm1 = ((math.factorial(n) /
+                       (math.factorial(n - i)
+                       * math.factorial(i)))
+                       * aPow * xPow)
+                                 
+        print ("MiddleTerm = {}" .
+                     format(middleTerm1))
+ 
+    else :
+ 
+        # If n is odd
+         
+        # calculating the middle term
+        i = int((n - 1) / 2)
+        j = int((n + 1) / 2)
+ 
+        # calculating the value of A to the
+        # power k and X to the power k
+        aPow = int(math.pow(A, n - i))
+        xPow = int(math.pow(X, i))
+ 
+        middleTerm1 = ((math.factorial(n)
+                    / (math.factorial(n - i)
+                    * math.factorial(i)))
+                        * aPow * xPow)
+ 
+        # calculating the value of A to the
+        # power k and X to the power k
+        aPow = int(math.pow(A, n - j))
+        xPow = int(math.pow(X, j))
+ 
+        middleTerm2 = ((math.factorial(n)
+                   / (math.factorial(n - j)
+                   * math.factorial(j)))
+                      * aPow * xPow)
+ 
+        print ("MiddleTerm1 = {}" .
+               format(int(middleTerm1)))
+                         
+        print ("MiddleTerm2 = {}" .
+               format(int(middleTerm2)))
+
+
+# %%
 def Finv(distribution, prob):
     lower, upper = 0.0,1.0
     if distribution == "uniform":
@@ -398,15 +467,10 @@ print("SP: ", mean(e), "(should be 0.751)")
 #
 
 # %%
-# TotalValueFairPA = [x for x in a if x != 0]
-# TotalValueFairIID = [x for x in b if x != 0]
-# TotalValueFairSK = [x for x in c if x != 0]
-# TotalValueFairEHKS = [x for x in d if x != 0]
-
-# a = TotalValueFairPA
-# b = TotalValueFairIID
-# c = TotalValueFairSK 
-# d = TotalValueFairEHKS 
+# TotalValueFairPA = a
+# TotalValueFairIID = b
+# TotalValueFairSK = c
+# TotalValueFairEHKS = d
 
 print("Uniform case, for FairPA")
 # print("Assuming SK as the 'optimal, but unfair, online algorithm' :", mean(a) / mean(c) *100, "%")
