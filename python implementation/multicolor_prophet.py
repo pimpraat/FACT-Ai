@@ -29,6 +29,11 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from statistics import mean
 
+from numpy import save
+from numpy import load
+
+from tqdm import tqdm # for the progress bar
+
 rng = default_rng()
 
 # %%
@@ -271,15 +276,12 @@ def Finv(distribution, prob):
         return scipy.stats.binom.ppf(prob, n=1000, p=0.5)
         
 
-## Is different for the Binomial!
-def MiddleUniform(n):
-    rrange = 1.0
-    return rrange * np.power(1.0 / 2, 1.0 / n)
-    
-def MiddleBinomialDistribution(n):
-    pass
-
-#TODO: make class for the distributions!!
+def Middle(distribution_type, n):
+    if distribution_type == "uniform":
+        rrange = 1.0
+        return rrange * np.power(1.0 / 2, 1.0 / n)
+    if distribution_type == "binomial":
+        raise NotImplementedError
         
 def FairGeneralProphet (q, V, distribution_type):
     summ = 0.0
@@ -302,7 +304,7 @@ def FairIIDProphet(Values, distribution_type):
 #TODO: Right now only works for uniform distribution!
 def SC_algorithm(Values, distribution_type):
     for i in range(0, len(Values)):
-        if Values[i] >= MiddleUniform(len(Values)):
+        if Values[i] >= Middle(distribution_type, len(Values)):
             return i
 
 
@@ -362,7 +364,7 @@ def generateDistribution(distribution_type, size):
 """
 def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
     arrivalPositionsChosen, chosenValues = [0]*n_candidates, []
-    for _ in range(0, N_experimentReps):
+    for _ in tqdm(range(0, N_experimentReps)):
         q, Values = generateDistribution(distribution_type, n_candidates)
         
         if algorithm == "FairGeneralProphet":
@@ -467,19 +469,10 @@ print("SP: ", mean(e), "(should be 0.751)")
 #
 
 # %%
-# TotalValueFairPA = a
-# TotalValueFairIID = b
-# TotalValueFairSK = c
-# TotalValueFairEHKS = d
-
 print("Uniform case, for FairPA")
-# print("Assuming SK as the 'optimal, but unfair, online algorithm' :", mean(a) / mean(c) *100, "%")
-# print("Assuming EHKS as the 'optimal, but unfair, online algorithm' :", mean(a) / mean(d) *100, "%")
 print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(a) / mean(e) *100, "%")
 
 print("\n Uniform case, for FairIID")
-# print("Assuming SK as the 'optimal, but unfair, online algorithm' :", mean(b) / mean(c) *100, "%")
-# print("Assuming EHKS as the 'optimal, but unfair, online algorithm' :", mean(b) / mean(d) *100, "%")
 print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b) / mean(e) *100, "%")
 
 
@@ -491,37 +484,45 @@ print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b) / 
 # ## Binomial distribution
 
 # %%
-# input consists of 1000 samples from the binomial distribution with 1000 trials 
-# and 1/2 probability of success of a single trial
-n = 200
-k = n # since each candidate is a group on its own
-q, V = [1/n] * n , rng.binomial(n=1000, p=.5, size=n)
+arrivalPositionsChosenFairPA, FairPA_values = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
+save('data/FairPA_positions.npy', arrivalPositionsChosenFairPA)
+save('data/FairPA_values.npy', FairPA_values)
 
-N_experimentReps = 2000
-arrivalPositionsChosenFairPA, arrivalPositionsChosenFairIID = [0]*n, [0]*n
+# %%
+arrivalPositionsChosenFairIID, FairIID_values = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
+save('data/FairIID_positions.npy', arrivalPositionsChosenFairIID)
+save('data/FairIID_values.npy', FairIID_values)
 
-# Running experiment for the FairPA
-for cnt in range(N_experimentReps):
-#     print(cnt)
-    if (cnt % 50 == 0) : print(cnt)
-    q, V = [1/n] * n , rng.binomial(n=1000, p=.5, size=n)
-    result = FairGeneralProphet(q, V, "binomial")
-    if result != None:
-        arrivalPositionsChosenFairPA[FairGeneralProphet(q, V, "binomial")] += 1
-# print("Ran FairPA")
+# %%
+# arrivalPositionsChosenSC, c = runExperiment(algorithm="SC", N_experimentReps=5000, 
+#                                                distribution_type="binomial", n_candidates=400)
 
-# Running experiment for the FairIID
-for cnt in range(N_experimentReps):
-#     print("2: ", cnt)
-    if cnt % 50 : print(cnt)
-    q, V = [1/n] * n , rng.binomial(n=1000, p=.5, size=n)
-    if FairIIDProphet(V, "binomial") != None:
-        arrivalPositionsChosenFairIID[FairIIDProphet(V, "binomial")] += 1
-            
-plt.plot(range(0,n), arrivalPositionsChosenFairPA, label="Fair PA")
-plt.plot(range(0,n), arrivalPositionsChosenFairIID, label="Fair IID")
+# %%
+arrivalPositionsChosenEHKS, EHKS_values = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
+
+save('data/EHKS_positions.npy', arrivalPositionsChosenEHKS)
+save('data/EHKS_values.npy', EHKS_values)
+
+# %%
+arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
+
+save('data/DP_positions.npy', arrivalPositionsChosenDP)
+save('data/DP_values.npy', DP_values)
+
+# %%
+plt.plot(range(0,1000), load('data/FairPA_positions.npy'), label="FairPA")
+plt.plot(range(0,1000), load('data/FairIID_positions.npy'), label="Fair IID")
+plt.plot(range(0,1000), load('data/EHKS_positions.npy'), label="EHKS")
+#plt.plot(range(0,400), arrivalPositionsChosenSC, label="SC")
+plt.plot(range(0,1000), load('data/DP_positions.npy'), label="DP")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
+plt.title("Binomial distribution with 1k candidates, and 50k experiments")
 plt.legend(loc="upper right")
+plt.savefig("binomial.png")
 
 # %%

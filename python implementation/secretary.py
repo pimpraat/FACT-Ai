@@ -1,8 +1,10 @@
+# %%
 import numpy as np
 from itertools import repeat
 import random
 from operator import itemgetter
 
+# %%
 def secretary_algorithm(candidates, color_per_candidate, max_colors):
 
     stop_rule = round(len(candidates)/np.e)
@@ -20,6 +22,7 @@ def secretary_algorithm(candidates, color_per_candidate, max_colors):
         
     return best_candidate, winning_color, best_candidate == max_colors[winning_color]
 
+# %%
 def one_color_secretary_algorithm(colored_candidates, color_per_candidate, max_colors):
     max_probability = (max(np.array(list(colored_candidates.values()), dtype=object)[:,1]))
 
@@ -33,6 +36,7 @@ def one_color_secretary_algorithm(colored_candidates, color_per_candidate, max_c
     
     return best_candidate, winning_color, best_candidate == max_colors[winning_color]
 
+# %%
 def multiple_color_secretary_algorithm(colors, candidates, color_per_candidate, thresholds, n, max_colors):
 
     # print(n)
@@ -65,8 +69,9 @@ def multiple_color_secretary_algorithm(colors, candidates, color_per_candidate, 
            
         # print(stop_rule) 
         # print("\n")
-    
-    
+
+
+# %%
 def create_data(n, colors, probabilities):
     
     candidates = np.arange(0, n, 5)
@@ -81,6 +86,7 @@ def create_data(n, colors, probabilities):
         
     return candidates, colored_candidates
 
+# %%
 def multiple_color_thresholds(colors, probabilities):
     
     # print(colors)
@@ -108,6 +114,7 @@ def multiple_color_thresholds(colors, probabilities):
     print(thresholds)
     return thresholds
 
+# %%
 def shuffle_input(candidates, color_per_candidate):
     
     color_matching = list(zip(candidates, color_per_candidate))
@@ -116,7 +123,8 @@ def shuffle_input(candidates, color_per_candidate):
     candidates, color_per_candidate = zip(*color_matching)
     
     return candidates, color_per_candidate
-    
+
+# %%
 if __name__ == "__main__":
 
     n = 105
