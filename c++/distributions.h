@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,10 @@ namespace fair_secretary {
 // Provides statistics about Random, Uniform and Binomial distribution.
 class RandomDistribution {
  public:
+  // RandomDistribution(UniformDistribution dist1, UniformDistribution dist2){
+  //   dist1 = dist1;
+  //   dist2 = dist2;
+  // }
   virtual double Reverse(double x) { return 1.0; }
   virtual double Sample() { return 1.0; }
   virtual double Middle(int n) { return 1.0; }

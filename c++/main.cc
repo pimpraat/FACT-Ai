@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include <ostream>
 #include <random>
 #include <type_traits>
@@ -34,6 +36,20 @@
 #include "unfair-secretary.h"
 #include "utils.h"
 
+
+#include "bank_oracle.cc"
+// #include "clustering.cc"
+#include "distributions.cc"
+#include "fair-prophet.cc"
+#include "fair-secretary.cc"
+// #include "pokec_oracle.cc"
+#include "random_handler.cc"
+#include "secretary_eval.cc"
+#include "synthetic_data.cc"
+#include "unfair-prophet.cc"
+#include "unfair-secretary.cc"
+// #include "utils.cc"
+
 namespace fair_secretary {
 
 using std::vector;
@@ -41,13 +57,14 @@ using std::cout;
 using std::endl;
 
 // The number of repetitions for the experiments.
-const int num_rep = 100;
+const int num_rep = 200;
 
 // General helper functions.
 void MyShuffle(vector<SecretaryInstance>& elements) {
   for (int j = 0; j < 2; j++) {
     for (int i = 0; i < elements.size(); i++) {
       int x = RandomHandler::eng_() % elements.size();
+      // cout << RandomHandler::eng_() << endl;
       std::swap(elements[i], elements[x]);
     }
   }
@@ -98,32 +115,35 @@ void SecretaryExperiment(vector<SecretaryInstance> instance, int num_color,
       num_color);
   UnfairSecretaryAlgorithm unfair_sec_algo;
   for (int i = 0; i < num_rep; i++) {
+    // cout << "ENTER SHUFFLE" << endl;
     MyShuffle(instance);
     answer.push_back(fair_sec_algo.ComputeSolution(instance));
     answer_unfair.push_back(unfair_sec_algo.ComputeSolution(instance));
     answer_single.push_back(unfair_sec_algo.ComputeSolutionSingleColor(
         instance, vector<double>(num_color, 1.0 / num_color)));
   }
+  cout << "MultiColor Secretary:" << endl;
   SecretaryEval::Eval(instance, answer, num_color);
-  cout << "Unfair Results." << endl;
+  cout << "\nSA:" << endl;
   SecretaryEval::Eval(instance, answer_unfair, num_color);
+  cout << "\nSingleColor SA:" << endl;
   SecretaryEval::Eval(instance, answer_single, num_color);
 }
 
-void SecretaryThresholdExperiment(vector<SecretaryInstance> instance,
-                                  int num_color) {
-  vector<vector<SecretaryInstance>> answers;
-  for (double i = 0; i < 20; i++) {
-    answers.push_back(vector<SecretaryInstance>());
-    FairSecretaryAlgorithm fair_sec_algo(
-        vector<int>(num_color, instance.size() * (0.05 * i)), num_color);
-    for (int j = 0; j < num_rep; j++) {
-      MyShuffle(instance);
-      answers[i].push_back(fair_sec_algo.ComputeSolution(instance));
-    }
-  }
-  SecretaryEval::ThEval(instance, answers, num_color);
-}
+// void SecretaryThresholdExperiment(vector<SecretaryInstance> instance,
+//                                   int num_color) {
+//   vector<vector<SecretaryInstance>> answers;
+//   for (double i = 0; i < 20; i++) {
+//     answers.push_back(vector<SecretaryInstance>());
+//     FairSecretaryAlgorithm fair_sec_algo(
+//         vector<int>(num_color, instance.size() * (0.05 * i)), num_color);
+//     for (int j = 0; j < num_rep; j++) {
+//       MyShuffle(instance);
+//       answers[i].push_back(fair_sec_algo.ComputeSolution(instance));
+//     }
+//   }
+//   SecretaryEval::ThEval(instance, answers, num_color);
+// }
 
 // Single threshold experiments.
 
@@ -140,22 +160,22 @@ void BankSecretaryExperiment(const vector<double>& threshold) {
 
 // Please make sure that you update the path to the input in `clustering.cc`
 // file. One can modify the way that the input is read there as well.
-void ClusteringSecretaryExperiment(const vector<double>& threshold) {
-  ClusteringOracle clustering_oracle;
-  vector<SecretaryInstance> instance =
-      clustering_oracle.GetSecretaryInput(/*num_elements=*/100000);
-  SecretaryExperiment(instance, clustering_oracle.num_colors, threshold);
-}
+// void ClusteringSecretaryExperiment(const vector<double>& threshold) {
+//   ClusteringOracle clustering_oracle;
+//   vector<SecretaryInstance> instance =
+//       clustering_oracle.GetSecretaryInput(/*num_elements=*/100000);
+//   SecretaryExperiment(instance, clustering_oracle.num_colors, threshold);
+// }
 
 // This is the Influence maximization experiment for the pokec dataset in the
 // paper. Please make sure that you update the path to the input in
 // `pokec_oracle.cc` file. One can modify the way that the input is read there
 // as well.
-void InfMaxSecretaryExperiment(const vector<double>& threshold) {
-  PokecOracle pokec_data;
-  vector<SecretaryInstance> instance = pokec_data.GetSecretaryInput();
-  SecretaryExperiment(instance, pokec_data.num_colors, threshold);
-}
+// void InfMaxSecretaryExperiment(const vector<double>& threshold) {
+//   PokecOracle pokec_data;
+//   vector<SecretaryInstance> instance = pokec_data.GetSecretaryInput();
+//   SecretaryExperiment(instance, pokec_data.num_colors, threshold);
+// }
 
 // This is the Syntatic experiment for the secretary problem in the paper. The
 // fields that are needed to be set are explained inside the function.
@@ -171,20 +191,20 @@ void SyntaticSecretaryExperiment(const vector<double>& threshold) {
 
 // Multi threshold experiments. Same as the experiments above but runs for
 // multiple thresholds instead of the best one.
-void BankSecretaryThresholdExperiment() {
-  BankOracle bank_oracle;
-  vector<SecretaryInstance> instance =
-      bank_oracle.GetSecretaryInput(/*num_elements=*/100000);
-  SecretaryThresholdExperiment(instance, bank_oracle.num_colors);
-}
+// void BankSecretaryThresholdExperiment() {
+//   BankOracle bank_oracle;
+//   vector<SecretaryInstance> instance =
+//       bank_oracle.GetSecretaryInput(/*num_elements=*/100000);
+//   SecretaryThresholdExperiment(instance, bank_oracle.num_colors);
+// }
 
-void SyntaticSecretaryThresholdExperiment() {
-  SyntheticData syn_data;
-  // The number of elements from each color.
-  vector<SecretaryInstance> instance =
-      syn_data.GetSecretaryInput({1000, 1000, 1000, 1000, 1000});
-  SecretaryThresholdExperiment(instance, syn_data.num_colors);
-}
+// void SyntaticSecretaryThresholdExperiment() {
+//   SyntheticData syn_data;
+//   // The number of elements from each color.
+//   vector<SecretaryInstance> instance =
+//       syn_data.GetSecretaryInput({1000, 1000, 1000, 1000, 1000});
+//   SecretaryThresholdExperiment(instance, syn_data.num_colors);
+// }
 
 // This is Syntatic experiment for secretary problem that instead of selecting
 // with equal probability from each color, selects proportional to a given
@@ -208,8 +228,10 @@ void UnbalanceThresholdSecretary() {
   threshold.reserve(th_d.size());
   const int num_algos = 3;
   for (int i = 0; i < th_d.size(); i++) {
+    // cout << th_d[i] << endl;
+    // cout << sum_sizes << endl;
     threshold.push_back(th_d[i] * sum_sizes);
-    cout << threshold.back() << endl;
+    // cout << threshold.back() << endl;
   }
   FairSecretaryAlgorithm fair_sec_algo(threshold, prob.size());
   UnfairSecretaryAlgorithm unfair_algo;
@@ -218,6 +240,7 @@ void UnbalanceThresholdSecretary() {
   vector<vector<int>> max_dist(num_algos, vector<int>(num_colors, 0));
   int not_picked[num_algos] = {0, 0, 0};
   int total_correct_answer[num_algos] = {0, 0, 0};
+  vector<string> name_algorithms = {"MultiColor Secretary", "SA", "Single Color SA"};
   for (int i = 0; i < num_rep; i++) {
     vector<SecretaryInstance> instance =
         syn_data.GetSecretaryInput(sizes, prob);
@@ -234,7 +257,8 @@ void UnbalanceThresholdSecretary() {
     }
   }
   for (int j = 0; j < num_algos; j++) {
-    cout << "Max Distribution:" << endl;
+    cout << name_algorithms[j] << endl;
+    cout << "Max per Color:" << endl;
     for (int i = 0; i < num_colors; i++) {
       cout << max_dist[j][i] << " ";
     }
@@ -249,8 +273,9 @@ void UnbalanceThresholdSecretary() {
       cout << correct_answer[j][i] << " ";
     }
     cout << endl;
-    cout << "Total Correct Answer:" << total_correct_answer[j] << endl;
-    cout << "Total Not Picked: " << not_picked[j] << endl;
+    cout << "Total Correct Answer compared with total max:" << total_correct_answer[j] << endl;
+    cout << "Total Not Picked:" << not_picked[j] << endl;
+    cout << "\n" << endl;
   }
 }
 
@@ -267,8 +292,10 @@ void SyntaticProphetExperiment() {
   bi_dist.ComputeMaxDist(size);
   // Chose the desired distributions to be used. The numbers are sampled from
   // these two distributions, half from each.
-  vector<std::reference_wrapper<RandomDistribution>> distributions = {
-      unif_dist, unif_dist};
+
+  // vector<std::reference_wrapper<RandomDistribution>> distributions = {
+  //     unif_dist, unif_dist};
+  vector<UniformDistribution> distributions = {unif_dist, unif_dist};
   vector<int> sizes(size, 1);
   vector<double> q(size, 1.0 / size);
   vector<SecretaryInstance> answer, answer_iid;
@@ -291,21 +318,34 @@ void SyntaticProphetExperiment() {
     answer_unfair4.push_back(
         unfair_algo.ComputeSolutionDiffEq(instance, distributions, q));
   }
+  cout << "Fair Prophet:" << endl;
   SecretaryEval::Eval(instance, answer, sizes.size());
   cout << "Average Value: " << Average(answer) << endl;
+
+  cout << "\nIID Prophet:" << endl;
   SecretaryEval::Eval(instance, answer_iid, sizes.size());
   cout << "Average Value: " << Average(answer_iid) << endl;
-  cout << "Unfair Results." << endl;
+
+  cout << "\nOneHalf Prophet:" << endl;
   SecretaryEval::Eval(instance, answer_unfair1, sizes.size());
   cout << "Average Value: " << Average(answer_unfair1) << endl;
+
+  cout << "\nOneMinusOneE Prophet:" << endl;
   SecretaryEval::Eval(instance, answer_unfair2, sizes.size());
   cout << "Average Value: " << Average(answer_unfair2) << endl;
+
+  cout << "\nThreeForth Prophet:" << endl;
   SecretaryEval::Eval(instance, answer_unfair3, sizes.size());
   cout << "Average Value: " << Average(answer_unfair3) << endl;
+
+  cout << "\nDiffEq Prophet:" << endl;
   SecretaryEval::Eval(instance, answer_unfair4, sizes.size());
   cout << "Average Value: " << Average(answer_unfair4) << endl;
 }
 }  // namespace fair_secretary
+
+using std::cout;
+using std::endl;
 
 int main() {
   // Computes the optimum thresholds for the threshold-based algorithms.
@@ -317,7 +357,9 @@ int main() {
   // each function above.
 
   // Experiments for the Secretary problem.
+  // cout << "BANK EXPERIMENT:" << endl;
   // fair_secretary::BankSecretaryExperiment(threshold);
+  // cout << "SYNTHETIC SECRETARY =p:" << endl;
   // fair_secretary::SyntaticSecretaryExperiment(threshold);
   // fair_secretary::ClusteringSecretaryExperiment(threshold);
   // fair_secretary::InfMaxSecretaryExperiment(threshold);
@@ -327,9 +369,11 @@ int main() {
   // This is also an experiment for the Secretaty problem. In this experiment
   // we indicate the probability that we want to select from each color.
   // The variables can be set inside the function.
+  // cout << "SYNTHETIC SECRETARY !p:" << endl;
   // fair_secretary::UnbalanceThresholdSecretary();
 
   // Experiments for Prophet Problem.
-  // fair_secretary::SyntaticProphetExperiment();
+  cout << "PROPHET EXPERIMENT:" << endl;
+  fair_secretary::SyntaticProphetExperiment();
   return 0;
 }

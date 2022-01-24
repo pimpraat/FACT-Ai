@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ using std::vector;
 
 SecretaryInstance FairProphetAlgorithm::ComputeSolution(
     const vector<SecretaryInstance>& elements,
-    const std::vector<std::reference_wrapper<RandomDistribution>> distributions,
+    std::vector<UniformDistribution>& distributions,
     const vector<double>& q) {
   double sum = 0;
   for (int i = 0; i < elements.size(); i++) {
-    if (elements[i].value >= distributions[elements[i].type].get().Reverse(
+    if (elements[i].value >= distributions[elements[i].type].Reverse(
                                  1.0 - (q[i] / (2 - sum)))) {
       return elements[i];
     }
@@ -35,12 +35,12 @@ SecretaryInstance FairProphetAlgorithm::ComputeSolution(
 
 SecretaryInstance FairProphetAlgorithm::ComputeSolutionIID(
     const vector<SecretaryInstance>& elements,
-    const std::vector<std::reference_wrapper<RandomDistribution>> distributions,
+    std::vector<UniformDistribution>& distributions,
     const vector<double>& q) {
   double p = (2.0 / 3.0) / elements.size();
   for (int i = 0; i < elements.size(); i++) {
     if (elements[i].value >=
-        distributions[elements[i].type].get().Reverse(1.0 - p / (1 - p * i))) {
+        distributions[elements[i].type].Reverse(1.0 - p / (1 - p * i))) {
       return elements[i];
     }
   }
