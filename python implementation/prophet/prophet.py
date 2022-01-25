@@ -34,10 +34,104 @@ from numpy import load
 
 from tqdm import tqdm # for the progress bar
 
-rng = default_rng()
+
+# %% [markdown]
+# _We next consider the following multi-color prophet problem. In this model n candidates arrive in uniform random order. Candidates are partitioned into k groups $C = {C_1,···,C_k}$. We write $n=(n1,...,nk)$ for the vector of groupsizes, i.e., $|C_j| = n_j$ ,for all 1 ≤ j ≤ k. We identify each of the groups with a distinct color and let c(i), vi denote the color and value of candidate i, respectively. The value vi that is revealed upon arrival of i, and is drawn independently from a given distribution Fi. We use $F = (F_1, . . . , Fn)$ to refer to the vector of distributions. We are also given a probability vector $p = (p_1, . . . , p_k)$. The goal is to select a candidate in an online manner in order to maximize the expectation of the value of the selected candidate, while selecting from each color with probability proportional to p. We distinguish between the basic setting in which $p_j$ is the proportion of candidates that belong to group j, i.e., $p_j = n_j/n$, and the general setting in which $p$ is arbitrary. We compare ourselves with the fair optimum, the optimal offline algorithm that respects the $p_j$ ’s._
+
+# %% [markdown]
+# ## The two algorithms presented in the paper
 
 # %%
-diff_solution_50 = [1.00E+00, 9.73E-01, 9.45E-01, 9.18E-01, 8.91E-01, 8.63E-01, 8.36E-01,
+def middleBinomial(n):
+    n_candidates = n
+    n = 1000
+    p = 0.5 #probability of coin succeeding
+    choose = np.zeros((n+1,n+1)) # creating 'choose' variable -> number of combinations per number of successes
+    for i in range(n+1):
+        choose[i,0] = 1
+
+    for i in range(1,n+1):
+        for j in range(1,n+1):
+            choose[i,j] = choose[i-1,j-1] + choose[i-1,j]
+
+    n_combinations = choose[-1]
+    probability = np.ones((n+1)) #probability of n successes
+    r_probability = np.ones((n+1)) #reverse probability of n failures
+
+    for i in range(1,n+1):
+        probability[i] = probability[i - 1] * p
+        r_probability[i] = r_probability[i - 1] * (1 - p);
+        
+        
+    #max dist --> chance of getting at least certain amount of successes after all candidates
+    x = n_combinations * probability * np.flip(r_probability) #calculating p of i successes in one try, by multiplying the p of this many successes, this many failures and all combinations in which they could have occurred
+    x_cum = np.flip(np.cumsum(np.flip(x))) #calculating cumulative probability (p of getting at least i successes in one try)
+    max_dist = 1 - pow(1-x_cum, n_candidates) #p of getting i successes after certain amount of tries
+
+    #middle --> find highest number of successes where probability of reaching at least that is more than 0.5
+    for i in np.arange(len(max_dist)-1, -1,-1):
+        if max_dist[i] >= 0.5:
+            #TODO: figure out why in the code they do divde this by n!
+            middle = i #/ n ### question: binomial data comes in absolute n successes or fraction of total tries ??? ###
+            break
+        if i == 0.0:
+            middle = 0
+    return middle
+
+
+# %%
+def Finv(distribution, prob):
+    lower, upper = 0.0,1.0
+    if distribution == "uniform":
+        return prob * (upper-lower)
+    if distribution == "binomial":
+        return scipy.stats.binom.ppf(prob, n=1000, p=0.5)
+        
+
+def Middle(distribution_type, n):
+    if distribution_type == "uniform":
+        rrange = 1.0
+        return rrange * np.power(1.0 / 2, 1.0 / n)
+    if distribution_type == "binomial":
+        return middleBinomial(n)
+        
+        
+def FairGeneralProphet (q, V, distribution_type):
+    summ = 0.0
+    for i in range(0,len(V)): #value < 1 reaches a drop!
+        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (2.0 - summ)))):
+#         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
+            return i
+        summ += q[i]
+
+def FairIIDProphet(Values, distribution_type):
+    for i in range(0, len(Values)):
+        p = (2.0 / 3.0) / len(Values)
+        if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
+            return i
+
+
+
+# %%
+# Implemented according to the function “ComputeSolutionOneHalf” in unfair-prophet.cc
+def SC_algorithm(Values, distribution_type):
+    middleValue = Middle(distribution_type, len(Values))
+    for i in range(0, len(Values)):
+        if Values[i] >= middleValue:
+            return i
+
+
+# Implemented according to the function “ComputeSolutionOneMinusOneE” in unfair-prophet.cc
+def EHKS_algorithm(Values, distribution_type):
+    for i in range(0, len(Values)):
+        if Values[i] >= Finv(distribution_type, (1.0 - (1.0 / len(Values)))):
+            return i
+
+# Implemented according to the function “ComputeSolutionDiffEq” in unfair-prophet.cc
+def DP_algorithm(Values, distribution_type):
+#     TODO: still need to figure out if these precomputed thresholds hold!
+
+    diff_solution_50 = [1.00E+00, 9.73E-01, 9.45E-01, 9.18E-01, 8.91E-01, 8.63E-01, 8.36E-01,
       8.09E-01, 7.82E-01, 7.56E-01, 7.29E-01, 7.03E-01, 6.76E-01, 6.50E-01,
       6.24E-01, 5.99E-01, 5.74E-01, 5.49E-01, 5.24E-01, 4.99E-01, 4.75E-01,
       4.52E-01, 4.28E-01, 4.05E-01, 3.83E-01, 3.61E-01, 3.39E-01, 3.18E-01,
@@ -46,7 +140,7 @@ diff_solution_50 = [1.00E+00, 9.73E-01, 9.45E-01, 9.18E-01, 8.91E-01, 8.63E-01, 
       6.78E-02, 5.60E-02, 4.50E-02, 3.46E-02, 2.49E-02, 1.59E-02, 7.65E-03,
       1.95E-04]
 
-diff_solution_1000 = [
+    diff_solution_1000 = [
       1.00E+00, 9.99E-01, 9.97E-01, 9.96E-01, 9.95E-01, 9.93E-01, 9.92E-01,
       9.91E-01, 9.89E-01, 9.88E-01, 9.87E-01, 9.85E-01, 9.84E-01, 9.83E-01,
       9.81E-01, 9.80E-01, 9.79E-01, 9.77E-01, 9.76E-01, 9.74E-01, 9.73E-01,
@@ -192,170 +286,6 @@ diff_solution_1000 = [
       1.94E-03, 1.59E-03, 1.24E-03, 8.87E-04, 5.40E-04, 1.95E-04]
 
 
-# %% [markdown]
-# _We next consider the following multi-color prophet problem. In this model n candidates arrive in uniform random order. Candidates are partitioned into k groups $C = {C_1,···,C_k}$. We write $n=(n1,...,nk)$ for the vector of groupsizes, i.e., $|C_j| = n_j$ ,for all 1 ≤ j ≤ k. We identify each of the groups with a distinct color and let c(i), vi denote the color and value of candidate i, respectively. The value vi that is revealed upon arrival of i, and is drawn independently from a given distribution Fi. We use $F = (F_1, . . . , Fn)$ to refer to the vector of distributions. We are also given a probability vector $p = (p_1, . . . , p_k)$. The goal is to select a candidate in an online manner in order to maximize the expectation of the value of the selected candidate, while selecting from each color with probability proportional to p. We distinguish between the basic setting in which $p_j$ is the proportion of candidates that belong to group j, i.e., $p_j = n_j/n$, and the general setting in which $p$ is arbitrary. We compare ourselves with the fair optimum, the optimal offline algorithm that respects the $p_j$ ’s._
-
-# %% [markdown]
-# ## The two algorithms presented in the paper
-
-# %%
-# factorial of a number n
-def factorial(n) :
-     
-    fact = 1
-    for i in range(1, n+1) :
-        fact = fact * i
- 
-    return fact;
- 
-# Function to find middle term in
-# binomial expansion series.
-def findMiddleTerm(A, X, n) :
- 
-    if (n % 2 == 0) :
-         
-        # If n is even
-         
-        # calculating the middle term
-        i = int(n / 2)
- 
-        # calculating the value of A to
-        # the power k and X to the power k
-        aPow = int(math.pow(A, n - i))
-        xPow = int(math.pow(X, i))
- 
-        middleTerm1 = ((math.factorial(n) /
-                       (math.factorial(n - i)
-                       * math.factorial(i)))
-                       * aPow * xPow)
-                                 
-        print ("MiddleTerm = {}" .
-                     format(middleTerm1))
- 
-    else :
- 
-        # If n is odd
-         
-        # calculating the middle term
-        i = int((n - 1) / 2)
-        j = int((n + 1) / 2)
- 
-        # calculating the value of A to the
-        # power k and X to the power k
-        aPow = int(math.pow(A, n - i))
-        xPow = int(math.pow(X, i))
- 
-        middleTerm1 = ((math.factorial(n)
-                    / (math.factorial(n - i)
-                    * math.factorial(i)))
-                        * aPow * xPow)
- 
-        # calculating the value of A to the
-        # power k and X to the power k
-        aPow = int(math.pow(A, n - j))
-        xPow = int(math.pow(X, j))
- 
-        middleTerm2 = ((math.factorial(n)
-                   / (math.factorial(n - j)
-                   * math.factorial(j)))
-                      * aPow * xPow)
- 
-        print ("MiddleTerm1 = {}" .
-               format(int(middleTerm1)))
-                         
-        print ("MiddleTerm2 = {}" .
-               format(int(middleTerm2)))
-
-
-# %%
-def middleBinomial(n):
-    n_candidates = n
-    n = 1000
-    p = 0.5 #probability of coin succeeding
-    choose = np.zeros((n+1,n+1)) # creating 'choose' variable -> number of combinations per number of successes
-    for i in range(n+1):
-        choose[i,0] = 1
-
-    for i in range(1,n+1):
-        for j in range(1,n+1):
-            choose[i,j] = choose[i-1,j-1] + choose[i-1,j]
-
-    n_combinations = choose[-1]
-    probability = np.ones((n+1)) #probability of n successes
-    r_probability = np.ones((n+1)) #reverse probability of n failures
-
-    for i in range(1,n+1):
-        probability[i] = probability[i - 1] * p
-        r_probability[i] = r_probability[i - 1] * (1 - p);
-        
-        
-    #max dist --> chance of getting at least certain amount of successes after all candidates
-    x = n_combinations * probability * np.flip(r_probability) #calculating p of i successes in one try, by multiplying the p of this many successes, this many failures and all combinations in which they could have occurred
-    x_cum = np.flip(np.cumsum(np.flip(x))) #calculating cumulative probability (p of getting at least i successes in one try)
-    max_dist = 1 - pow(1-x_cum, n_candidates) #p of getting i successes after certain amount of tries
-
-    #middle --> find highest number of successes where probability of reaching at least that is more than 0.5
-    for i in np.arange(len(max_dist)-1, -1,-1):
-        if max_dist[i] >= 0.5:
-            #TODO: figure out why in the code they do divde this by n!
-            middle = i #/ n ### question: binomial data comes in absolute n successes or fraction of total tries ??? ###
-            break
-        if i == 0.0:
-            middle = 0
-    return middle
-
-
-# %%
-def Finv(distribution, prob):
-    lower, upper = 0.0,1.0
-    if distribution == "uniform":
-        return prob * (upper-lower)
-    if distribution == "binomial":
-        return scipy.stats.binom.ppf(prob, n=1000, p=0.5)
-        
-
-def Middle(distribution_type, n):
-    if distribution_type == "uniform":
-        rrange = 1.0
-        return rrange * np.power(1.0 / 2, 1.0 / n)
-    if distribution_type == "binomial":
-        return middleBinomial(n)
-        
-        
-def FairGeneralProphet (q, V, distribution_type):
-    summ = 0.0
-    for i in range(0,len(V)): #value < 1 reaches a drop!
-        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (2.0 - summ)))):
-#         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
-            return i
-        summ += q[i]
-
-def FairIIDProphet(Values, distribution_type):
-    for i in range(0, len(Values)):
-        p = (2.0 / 3.0) / len(Values)
-        if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
-            return i
-
-
-
-# %%
-# Implemented according to the function “ComputeSolutionOneHalf” in unfair-prophet.cc
-def SC_algorithm(Values, distribution_type):
-    middleValue = Middle(distribution_type, len(Values))
-    for i in range(0, len(Values)):
-        if Values[i] >= middleValue:
-            return i
-
-
-# Implemented according to the function “ComputeSolutionOneMinusOneE” in unfair-prophet.cc
-def EHKS_algorithm(Values, distribution_type):
-    for i in range(0, len(Values)):
-        if Values[i] >= Finv(distribution_type, (1.0 - (1.0 / len(Values)))):
-            return i
-
-# Implemented according to the function “ComputeSolutionDiffEq” in unfair-prophet.cc
-def DP_algorithm(Values, distribution_type):
-#     TODO: still need to figure out if these precomputed thresholds hold!
     if len(Values) == 50:
         diff_solution = diff_solution_50
     else:
@@ -364,7 +294,6 @@ def DP_algorithm(Values, distribution_type):
     for i in range(0, len(Values)):
         if Values[i] >= Finv(distribution_type, np.power(diff_solution[i], (1.0 / (len(Values) - 1)))):
             return i
-
 
 # %% [markdown]
 # ## The experiments
@@ -386,6 +315,7 @@ def DP_algorithm(Values, distribution_type):
 :returns V:
 """
 def generateDistribution(distribution_type, size):
+    rng = default_rng()
     n = size
     if distribution_type == "uniform":
         q, V = [1/n] * n , rng.uniform(low=0.0, high=1.0, size=n)
@@ -452,7 +382,7 @@ plt.title("50k experiments, discarding None results")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.legend(loc="upper right")
-plt.savefig("50kExperiments.png")
+plt.savefig("images/50kExperiments.png")
 
 # %% [markdown]
 # This led us to examining two approaches. One in which we increase the number of experiments to 100k, and one where we run 50k experiments and keep repeating each experiment untill we don't get a None. The first one has been done above, and seems to confirm the found results.
@@ -476,18 +406,6 @@ arrivalPositionsChosenEHKS, d = runExperiment(algorithm="EHKS", N_experimentReps
 
 arrivalPositionsChosenDP, e = runExperiment(algorithm="DP", N_experimentReps=50000*2, 
                                                 distribution_type="uniform", n_candidates=50)
-
-plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
-plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
-plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
-plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
-plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
-plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
-plt.title("100k experiments, discarding None results")
-plt.xlabel("Arrival position")
-plt.ylabel("Num Picked")
-plt.legend(loc="upper right")
-plt.savefig("100kExperiments.png")
 
 # %% [markdown]
 # ### Average values of chosen candidates
@@ -606,67 +524,67 @@ save('data/EHKS_values.npy', EHKS_values)
 # Don't need mathmathical underpinning! Just mention that it is possible/relevant.
 
 # %%
-def FairGeneralProphet (q, V, distribution_type, parameter_value):
-    summ = 0.0
-    for i in range(0,len(V)): #value < 1 reaches a drop!
-        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (parameter_value - summ)))):
-#         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
-            return i
-        summ += q[i]
+# def FairGeneralProphet (q, V, distribution_type, parameter_value):
+#     summ = 0.0
+#     for i in range(0,len(V)): #value < 1 reaches a drop!
+#         if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (parameter_value - summ)))):
+# #         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
+#             return i
+#         summ += q[i]
 
-def FairIIDProphet(Values, distribution_type, parameter_value):
-    for i in range(0, len(Values)):
-        p = (2.0 / 3.0) / len(Values)
-        p = (2.0 / 2.0) / len(Values)
-        if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
-            return i
+# def FairIIDProphet(Values, distribution_type, parameter_value):
+#     for i in range(0, len(Values)):
+#         p = (2.0 / 3.0) / len(Values)
+#         p = (2.0 / 2.0) / len(Values)
+#         if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
+#             return i
         
-def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates, parameter_value):
-    arrivalPositionsChosen, chosenValues, chosenValuesExcludeNone = [0]*n_candidates, [], []
-    nones = 0
-    for _ in tqdm(range(0, N_experimentReps)):
-        q, Values = generateDistribution(distribution_type, n_candidates)
+# def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates, parameter_value):
+#     arrivalPositionsChosen, chosenValues, chosenValuesExcludeNone = [0]*n_candidates, [], []
+#     nones = 0
+#     for _ in tqdm(range(0, N_experimentReps)):
+#         q, Values = generateDistribution(distribution_type, n_candidates)
         
-        if algorithm == "FairGeneralProphet":
-                result = FairGeneralProphet(q, Values, distribution_type, parameter_value)
-        elif algorithm == "FairIIDProphet":
-                result = FairIIDProphet(Values, distribution_type, parameter_value)
-        elif algorithm == "SC":
-                result = SC_algorithm(Values, distribution_type)
-        elif algorithm =="EHKS":
-                result = EHKS_algorithm(Values, distribution_type)
-        elif algorithm == "DP":
-                result = DP_algorithm(Values, distribution_type)
-        if result != None:
-            arrivalPositionsChosen[result] += 1
-            chosenValues.append(Values[result])
-            chosenValuesExcludeNone.append(Values[result])
+#         if algorithm == "FairGeneralProphet":
+#                 result = FairGeneralProphet(q, Values, distribution_type, parameter_value)
+#         elif algorithm == "FairIIDProphet":
+#                 result = FairIIDProphet(Values, distribution_type, parameter_value)
+#         elif algorithm == "SC":
+#                 result = SC_algorithm(Values, distribution_type)
+#         elif algorithm =="EHKS":
+#                 result = EHKS_algorithm(Values, distribution_type)
+#         elif algorithm == "DP":
+#                 result = DP_algorithm(Values, distribution_type)
+#         if result != None:
+#             arrivalPositionsChosen[result] += 1
+#             chosenValues.append(Values[result])
+#             chosenValuesExcludeNone.append(Values[result])
             
-        if result == None: 
-            chosenValues.append(0)
-            nones += 1
+#         if result == None: 
+#             chosenValues.append(0)
+#             nones += 1
             
         
-    noneRate = nones/N_experimentReps
+#     noneRate = nones/N_experimentReps
         
-    return noneRate, mean(chosenValues), mean(chosenValuesExcludeNone), arrivalPositionsChosen
+#     return noneRate, mean(chosenValues), mean(chosenValuesExcludeNone), arrivalPositionsChosen
 
-df = pd.DataFrame(columns=['Parameter value', 'Avg None=0', "Avg discard none"])
-for param in [1.0, 1.25,1.5,1.75,2.0]:
-    nonerate, avg_include, avg_exclude, chosen_positions = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50, parameter_value=param)
-    print("Nonerate: ", nonerate * 100, "%")
-    print("Average value of the chosen candidate with none’s as 0 value: ", avg_include)
-    print("Average value of the chosen candidate with None's excluded: ", avg_exclude)
+# df = pd.DataFrame(columns=['Parameter value', 'Avg None=0', "Avg discard none"])
+# for param in [1.0, 1.25,1.5,1.75,2.0]:
+#     nonerate, avg_include, avg_exclude, chosen_positions = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50, parameter_value=param)
+#     print("Nonerate: ", nonerate * 100, "%")
+#     print("Average value of the chosen candidate with none’s as 0 value: ", avg_include)
+#     print("Average value of the chosen candidate with None's excluded: ", avg_exclude)
     
-    a_series = pd.Series([param,avg_include,avg_exclude], index = df.columns)
-    df = df.append(a_series, ignore_index=True)
+#     a_series = pd.Series([param,avg_include,avg_exclude], index = df.columns)
+#     df = df.append(a_series, ignore_index=True)
     
-#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
+# #     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
 
-    plt.plot(range(0,50), chosen_positions, label= str(param))
-plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
-plt.legend()
+#     plt.plot(range(0,50), chosen_positions, label= str(param))
+# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+# plt.legend()
 
 # %%
 import pandas as pd
