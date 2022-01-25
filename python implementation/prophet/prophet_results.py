@@ -85,7 +85,7 @@ plt.grid(visible=True, linewidth=.5)
 plt.title("100k experiments, discarding None results")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
-plt.legend(loc="upper right")
+plt.legend(loc="best", ncol=1)
 plt.savefig("images/uniform_distribution/100kExperiments.png")
 
 # %%
@@ -95,7 +95,7 @@ fig = pylab.figure()
 figlegend = pylab.figure(figsize=(30,20))
 ax = fig.add_subplot(111)
 lines = ax.plot(range(10), pylab.randn(10), range(10), pylab.randn(10),range(10), pylab.randn(10),range(10), pylab.randn(10),range(10), pylab.randn(10))
-figlegend.legend(lines, ('Fair PA', 'Fair IID', 'SC', 'EHKS', "DP/CFHOV"), 'center')
+figlegend.legend(lines, ('Fair PA', 'Fair IID', 'SC', 'EHKS', "DP/CFHOV"), loc='center', ncol=5)
 figlegend.savefig('images/legend.png')
 
 # %%

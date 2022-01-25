@@ -132,8 +132,8 @@ def EHKS_algorithm(Values, distribution_type):
 def DP_algorithm(Values, distribution_type):
 #     TODO: still need to figure out if these precomputed thresholds hold!
 
-    diff_solution_50 = np.loadtxt("diff_solution_50.txt", dtype=float)
-    diff_solution_1000 = np.loadtxt("diff_solution_1000.txt", dtype=float)
+    diff_solution_50 = np.loadtxt("diff_solution_50.txt", delimiter=", ")
+    diff_solution_1000 = np.loadtxt("diff_solution_1000.txt", delimiter=", ")
 
     if len(Values) == 50:
         diff_solution = diff_solution_50
