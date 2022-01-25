@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,23 +28,19 @@ class UnfairProphetAlgorithm {
  public:
   SecretaryInstance ComputeSolutionOneHalf(
       const std::vector<SecretaryInstance>& elements,
-      const std::vector<std::reference_wrapper<RandomDistribution>>
-          distributions,
+      std::vector<UniformDistribution>& distributions,
       const std::vector<double>& q);
   SecretaryInstance ComputeSolutionOneMinusOneE(
       const std::vector<SecretaryInstance>& elements,
-      const std::vector<std::reference_wrapper<RandomDistribution>>
-          distributions,
+      std::vector<UniformDistribution>& distributions,
       const std::vector<double>& q);
   SecretaryInstance ComputeSolutionThreeForth(
       const std::vector<SecretaryInstance>& elements,
-      const std::vector<std::reference_wrapper<RandomDistribution>>
-          distributions,
+      std::vector<UniformDistribution>& distributions,
       const std::vector<double>& q);
   SecretaryInstance ComputeSolutionDiffEq(
       const std::vector<SecretaryInstance>& elements,
-      const std::vector<std::reference_wrapper<RandomDistribution>>
-          distributions,
+      std::vector<UniformDistribution>& distributions,
       const std::vector<double>& q);
 };
 

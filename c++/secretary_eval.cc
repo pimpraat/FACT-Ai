@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,15 +67,15 @@ void SecretaryEval::Eval(const vector<SecretaryInstance>& instance,
     cout << num_answer[i] << " ";
   }
   cout << endl;
-  cout << "Correct Answer Distribution:" << endl;
+  cout << "Correct Answer Distribution per color:" << endl;
   for (int i = 0; i < num_colors; i++) {
     cout << correct_answer[i] << " ";
   }
   cout << endl;
-  cout << "Total Correct Answer: " << total_correct_answer << endl;
+  cout << "Total Correct Answer compared with total max: " << total_correct_answer << endl;
   cout << "Probability Correct Answer: "
        << static_cast<double>(total_correct_answer) / answer.size() << endl;
-  cout << "Total Not Picked: " << not_picked << endl;
+  cout << "Total None returns: " << not_picked << endl;
 }
 
 void SecretaryEval::ThEval(const vector<SecretaryInstance>& instance,

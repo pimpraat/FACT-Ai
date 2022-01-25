@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #include <iostream>
 
 #include "random_handler.h"
+#include "distributions.h"
 
 namespace fair_secretary {
 
@@ -27,6 +28,10 @@ vector<SecretaryInstance> SyntheticData::GetSecretaryInput(
   num_colors = sizes.size();
   vector<SecretaryInstance> instance;
   double rand = 2.0;
+
+
+
+
   if (!prob.empty()) {
     rand = static_cast<double>(RandomHandler::eng_()) /
            std::numeric_limits<uint64_t>::max();
@@ -49,15 +54,15 @@ vector<SecretaryInstance> SyntheticData::GetSecretaryInput(
 
 vector<SecretaryInstance> SyntheticData::GetProphetInput(
     const int size,
-    const vector<std::reference_wrapper<RandomDistribution>>& dist) {
+    std::vector<UniformDistribution>& dist) {
   num_colors = size;
   vector<SecretaryInstance> instance;
   for (int i = 0; i < size; i++) {
     if (i < size / 2) {
-      instance.push_back(SecretaryInstance(dist[0].get().Sample(), i, 0));
-
+      instance.push_back(SecretaryInstance(dist[0].Sample(), i, 0));
+// const vector<int>& sizes, const std::vector<double>& prob
     } else {
-      instance.push_back(SecretaryInstance(dist[1].get().Sample(), i, 1));
+      instance.push_back(SecretaryInstance(dist[1].Sample(), i, 1));
     }
   }
   return instance;

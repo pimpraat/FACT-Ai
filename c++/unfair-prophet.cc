@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ using std::vector;
 
 SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionOneMinusOneE(
     const vector<SecretaryInstance>& elements,
-    const std::vector<std::reference_wrapper<RandomDistribution>> distributions,
+    std::vector<UniformDistribution>& distributions,
     const vector<double>& q) {
   for (int i = 0; i < elements.size(); i++) {
-    if (elements[i].value >= distributions[elements[i].type].get().Reverse(
+    if (elements[i].value >= distributions[elements[i].type].Reverse(
                                  1.0 - (1.0 / elements.size()))) {
       return elements[i];
     }
@@ -33,11 +33,11 @@ SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionOneMinusOneE(
 
 SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionOneHalf(
     const vector<SecretaryInstance>& elements,
-    const std::vector<std::reference_wrapper<RandomDistribution>> distributions,
+    std::vector<UniformDistribution>& distributions,
     const vector<double>& q) {
   for (int i = 0; i < elements.size(); i++) {
     if (elements[i].value >=
-        distributions[elements[i].type].get().Middle(elements.size())) {
+        distributions[elements[i].type].Middle(elements.size())) {
       return elements[i];
     }
   }
@@ -46,11 +46,11 @@ SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionOneHalf(
 
 SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionThreeForth(
     const vector<SecretaryInstance>& elements,
-    const std::vector<std::reference_wrapper<RandomDistribution>> distributions,
+    std::vector<UniformDistribution>& distributions,
     const vector<double>& q) {
   for (int i = 0; i < elements.size(); i++) {
     if (elements[i].value >=
-        distributions[elements[i].type].get().PThreshold(i)) {
+        distributions[elements[i].type].PThreshold(i)) {
       return elements[i];
     }
   }
@@ -59,7 +59,7 @@ SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionThreeForth(
 
 SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionDiffEq(
     const vector<SecretaryInstance>& elements,
-    const std::vector<std::reference_wrapper<RandomDistribution>> distributions,
+    std::vector<UniformDistribution>& distributions,
     const vector<double>& q) {
   // Precomputed Threshold.
   vector<double> diff_solution_50 = {
@@ -219,7 +219,7 @@ SecretaryInstance UnfairProphetAlgorithm::ComputeSolutionDiffEq(
       elements.size() == 50 ? diff_solution_50 : diff_solution_1000;
   for (int i = 0; i < elements.size(); i++) {
     if (elements[i].value >=
-        distributions[elements[i].type].get().Reverse(
+        distributions[elements[i].type].Reverse(
             std::pow(diff_solution[i], 1.0 / (elements.size() - 1)))) {
       return elements[i];
     }

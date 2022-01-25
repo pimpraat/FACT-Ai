@@ -1,4 +1,4 @@
-// Copyright 2021 The Google Research Authors.
+// Copyright 2022 The Google Research Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ using std::vector;
 
 vector<SecretaryInstance> BankOracle::GetSecretaryInput(int num_elements) {
   // The path to the dataset.
-  string input_path ="";
+  string input_path ="bank_raw.csv";
   std::ifstream in(input_path);
   string input;
   // Ignoring the first line.
