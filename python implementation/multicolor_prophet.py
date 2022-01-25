@@ -268,6 +268,44 @@ def findMiddleTerm(A, X, n) :
 
 
 # %%
+def middleBinomial(n):
+    n_candidates = n
+    n = 1000
+    p = 0.5 #probability of coin succeeding
+    choose = np.zeros((n+1,n+1)) # creating 'choose' variable -> number of combinations per number of successes
+    for i in range(n+1):
+        choose[i,0] = 1
+
+    for i in range(1,n+1):
+        for j in range(1,n+1):
+            choose[i,j] = choose[i-1,j-1] + choose[i-1,j]
+
+    n_combinations = choose[-1]
+    probability = np.ones((n+1)) #probability of n successes
+    r_probability = np.ones((n+1)) #reverse probability of n failures
+
+    for i in range(1,n+1):
+        probability[i] = probability[i - 1] * p
+        r_probability[i] = r_probability[i - 1] * (1 - p);
+        
+        
+    #max dist --> chance of getting at least certain amount of successes after all candidates
+    x = n_combinations * probability * np.flip(r_probability) #calculating p of i successes in one try, by multiplying the p of this many successes, this many failures and all combinations in which they could have occurred
+    x_cum = np.flip(np.cumsum(np.flip(x))) #calculating cumulative probability (p of getting at least i successes in one try)
+    max_dist = 1 - pow(1-x_cum, n_candidates) #p of getting i successes after certain amount of tries
+
+    #middle --> find highest number of successes where probability of reaching at least that is more than 0.5
+    for i in np.arange(len(max_dist)-1, -1,-1):
+        if max_dist[i] >= 0.5:
+            #TODO: figure out why in the code they do divde this by n!
+            middle = i #/ n ### question: binomial data comes in absolute n successes or fraction of total tries ??? ###
+            break
+        if i == 0.0:
+            middle = 0
+    return middle
+
+
+# %%
 def Finv(distribution, prob):
     lower, upper = 0.0,1.0
     if distribution == "uniform":
@@ -281,12 +319,13 @@ def Middle(distribution_type, n):
         rrange = 1.0
         return rrange * np.power(1.0 / 2, 1.0 / n)
     if distribution_type == "binomial":
-        raise NotImplementedError
+        return middleBinomial(n)
+        
         
 def FairGeneralProphet (q, V, distribution_type):
     summ = 0.0
-    for i in range(0,len(V)):
-        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (2 - summ)))):
+    for i in range(0,len(V)): #value < 1 reaches a drop!
+        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (2.0 - summ)))):
 #         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
             return i
         summ += q[i]
@@ -301,10 +340,10 @@ def FairIIDProphet(Values, distribution_type):
 
 # %%
 # Implemented according to the function “ComputeSolutionOneHalf” in unfair-prophet.cc
-#TODO: Right now only works for uniform distribution!
 def SC_algorithm(Values, distribution_type):
+    middleValue = Middle(distribution_type, len(Values))
     for i in range(0, len(Values)):
-        if Values[i] >= Middle(distribution_type, len(Values)):
+        if Values[i] >= middleValue:
             return i
 
 
@@ -484,45 +523,159 @@ print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b) / 
 # ## Binomial distribution
 
 # %%
-arrivalPositionsChosenFairPA, FairPA_values = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
-                                                distribution_type="binomial", n_candidates=1000)
-save('data/FairPA_positions.npy', arrivalPositionsChosenFairPA)
-save('data/FairPA_values.npy', FairPA_values)
+# arrivalPositionsChosenFairPA, FairPA_values = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
+#                                                 distribution_type="binomial", n_candidates=1000)
+# save('data/FairPA_positions.npy', arrivalPositionsChosenFairPA)
+# save('data/FairPA_values.npy', FairPA_values)
 
 # %%
-arrivalPositionsChosenFairIID, FairIID_values = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
-                                                distribution_type="binomial", n_candidates=1000)
-save('data/FairIID_positions.npy', arrivalPositionsChosenFairIID)
-save('data/FairIID_values.npy', FairIID_values)
+# arrivalPositionsChosenFairIID, FairIID_values = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
+#                                                 distribution_type="binomial", n_candidates=1000)
+# save('data/FairIID_positions.npy', arrivalPositionsChosenFairIID)
+# save('data/FairIID_values.npy', FairIID_values)
 
 # %%
-# arrivalPositionsChosenSC, c = runExperiment(algorithm="SC", N_experimentReps=5000, 
-#                                                distribution_type="binomial", n_candidates=400)
+arrivalPositionsChosenSC, SC_values = runExperiment(algorithm="SC", N_experimentReps=2000, 
+                                               distribution_type="binomial", n_candidates=1000)
+
+save('data/SC_positions.npy', arrivalPositionsChosenSC)
+save('data/SC_values.npy', SC_values)
+
+arrivalPositionsChosenSC
 
 # %%
-arrivalPositionsChosenEHKS, EHKS_values = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
-                                                distribution_type="binomial", n_candidates=1000)
+# arrivalPositionsChosenEHKS, EHKS_values = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
+#                                                 distribution_type="binomial", n_candidates=1000)
 
-save('data/EHKS_positions.npy', arrivalPositionsChosenEHKS)
-save('data/EHKS_values.npy', EHKS_values)
+# save('data/EHKS_positions.npy', arrivalPositionsChosenEHKS)
+# save('data/EHKS_values.npy', EHKS_values)
 
 # %%
-arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000, 
-                                                distribution_type="binomial", n_candidates=1000)
+# arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000, 
+#                                                 distribution_type="binomial", n_candidates=1000)
 
-save('data/DP_positions.npy', arrivalPositionsChosenDP)
-save('data/DP_values.npy', DP_values)
+# save('data/DP_positions.npy', arrivalPositionsChosenDP)
+# save('data/DP_values.npy', DP_values)
 
 # %%
 plt.plot(range(0,1000), load('data/FairPA_positions.npy'), label="FairPA")
 plt.plot(range(0,1000), load('data/FairIID_positions.npy'), label="Fair IID")
 plt.plot(range(0,1000), load('data/EHKS_positions.npy'), label="EHKS")
-#plt.plot(range(0,400), arrivalPositionsChosenSC, label="SC")
+plt.plot(range(0,1000), load('data/SC_positions.npy')*25, label="SC")
 plt.plot(range(0,1000), load('data/DP_positions.npy'), label="DP")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.title("Binomial distribution with 1k candidates, and 50k experiments")
 plt.legend(loc="upper right")
 plt.savefig("binomial.png")
+
+# %%
+arrivalPositionsChosenFairPA, FairPA_values = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000*2, 
+                                                distribution_type="binomial", n_candidates=100)
+save('data/FairPA_positions100k.npy', arrivalPositionsChosenFairPA)
+save('data/FairPA_values100k.npy', FairPA_values)
+
+arrivalPositionsChosenFairIID, FairIID_values = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
+save('data/FairIID_positions.npy', arrivalPositionsChosenFairIID)
+save('data/FairIID_values.npy', FairIID_values)
+
+# arrivalPositionsChosenSC, SC_values = runExperiment(algorithm="SC", N_experimentReps=1000, 
+#                                                distribution_type="binomial", n_candidates=1000)
+
+# save('data/SC_positions.npy', arrivalPositionsChosenSC)
+# save('data/SC_values.npy', SC_values)
+
+arrivalPositionsChosenEHKS, EHKS_values = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
+
+save('data/EHKS_positions.npy', arrivalPositionsChosenEHKS)
+save('data/EHKS_values.npy', EHKS_values)
+
+# arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000, 
+#                                                 distribution_type="binomial", n_candidates=1000)
+
+# save('data/DP_positions.npy', arrivalPositionsChosenDP)
+# save('data/DP_values.npy', DP_values)
+
+
+# %% [markdown]
+# ## Extension
+
+# %% [markdown]
+# Don't need mathmathical underpinning! Just mention that it is possible/relevant.
+
+# %%
+def FairGeneralProphet (q, V, distribution_type, parameter_value):
+    summ = 0.0
+    for i in range(0,len(V)): #value < 1 reaches a drop!
+        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (parameter_value - summ)))):
+#         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
+            return i
+        summ += q[i]
+
+def FairIIDProphet(Values, distribution_type, parameter_value):
+    for i in range(0, len(Values)):
+        p = (2.0 / 3.0) / len(Values)
+        p = (2.0 / 2.0) / len(Values)
+        if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
+            return i
+        
+def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates, parameter_value):
+    arrivalPositionsChosen, chosenValues, chosenValuesExcludeNone = [0]*n_candidates, [], []
+    nones = 0
+    for _ in tqdm(range(0, N_experimentReps)):
+        q, Values = generateDistribution(distribution_type, n_candidates)
+        
+        if algorithm == "FairGeneralProphet":
+                result = FairGeneralProphet(q, Values, distribution_type, parameter_value)
+        elif algorithm == "FairIIDProphet":
+                result = FairIIDProphet(Values, distribution_type, parameter_value)
+        elif algorithm == "SC":
+                result = SC_algorithm(Values, distribution_type)
+        elif algorithm =="EHKS":
+                result = EHKS_algorithm(Values, distribution_type)
+        elif algorithm == "DP":
+                result = DP_algorithm(Values, distribution_type)
+        if result != None:
+            arrivalPositionsChosen[result] += 1
+            chosenValues.append(Values[result])
+            chosenValuesExcludeNone.append(Values[result])
+            
+        if result == None: 
+            chosenValues.append(0)
+            nones += 1
+            
+        
+    noneRate = nones/N_experimentReps
+        
+    return noneRate, mean(chosenValues), mean(chosenValuesExcludeNone), arrivalPositionsChosen
+
+df = pd.DataFrame(columns=['Parameter value', 'Avg None=0', "Avg discard none"])
+for param in [1.0, 1.25,1.5,1.75,2.0]:
+    nonerate, avg_include, avg_exclude, chosen_positions = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
+                                                distribution_type="uniform", n_candidates=50, parameter_value=param)
+    print("Nonerate: ", nonerate * 100, "%")
+    print("Average value of the chosen candidate with none’s as 0 value: ", avg_include)
+    print("Average value of the chosen candidate with None's excluded: ", avg_exclude)
+    
+    a_series = pd.Series([param,avg_include,avg_exclude], index = df.columns)
+    df = df.append(a_series, ignore_index=True)
+    
+#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
+
+    plt.plot(range(0,50), chosen_positions, label= str(param))
+plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+plt.legend()
+
+# %%
+import pandas as pd
+
+# %%
+df
+
+# %%
+q, v = generateDistribution("binomial", 10)
+v
 
 # %%
