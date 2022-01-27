@@ -374,75 +374,73 @@ save('data/DP_values100k.npy', DP_values)
 # Don't need mathmathical underpinning! Just mention that it is possible/relevant.
 
 # %%
-import pandas as pd
+# def FairGeneralProphetExtended(q, V, distribution_type, parameter_value):
+#     summ = 0.0
+#     for i in range(0,len(V)): #value < 1 reaches a drop!
+#         if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (parameter_value - summ)))):
+# #         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
+#             return i
+#         summ += q[i]
 
-def FairGeneralProphetExtended(q, V, distribution_type, parameter_value):
-    s = 0.0
-    for i in range(0,len(V)): #value < 1 reaches a drop!
-        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (parameter_value - s)))):
-#         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
-            return i
-        s += q[i]
-
-def FairIIDProphetExtended(Values, distribution_type, parameter_value):
-    for i in range(0, len(Values)):
-        p = (2.0 / 3.0) / len(Values)
-        p = (2.0 / 2.0) / len(Values)
-        if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
-            return i
+# def FairIIDProphetExtended(Values, distribution_type, parameter_value):
+#     for i in range(0, len(Values)):
+#         p = (2.0 / 3.0) / len(Values)
+#         p = (2.0 / 2.0) / len(Values)
+#         if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
+#             return i
         
-def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_candidates, parameter_value):
-    arrivalPositionsChosen, chosenValues, chosenValuesExcludeNone = [0]*n_candidates, [], []
-    nones = 0
-    for _ in tqdm(range(0, N_experimentReps)):
-        q, Values = generateDistribution(distribution_type, n_candidates)
+# def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_candidates, parameter_value):
+#     arrivalPositionsChosen, chosenValues, chosenValuesExcludeNone = [0]*n_candidates, [], []
+#     nones = 0
+#     for _ in tqdm(range(0, N_experimentReps)):
+#         q, Values = generateDistribution(distribution_type, n_candidates)
         
-        if algorithm == "FairGeneralProphet":
-                result = FairGeneralProphetExtended(q, Values, distribution_type, parameter_value)
-        elif algorithm == "FairIIDProphet":
-                result = FairIIDProphetExtended(Values, distribution_type, parameter_value)
-        elif algorithm == "SC":
-                result = SC_algorithm(Values, distribution_type)
-        elif algorithm =="EHKS":
-                result = EHKS_algorithm(Values, distribution_type)
-        elif algorithm == "DP":
-                result = DP_algorithm(Values, distribution_type)
-        if result != None:
-            arrivalPositionsChosen[result] += 1
-            chosenValues.append(Values[result])
-            chosenValuesExcludeNone.append(Values[result])
+#         if algorithm == "FairGeneralProphet":
+#                 result = FairGeneralProphetExtended(q, Values, distribution_type, parameter_value)
+#         elif algorithm == "FairIIDProphet":
+#                 result = FairIIDProphetExtended(Values, distribution_type, parameter_value)
+#         elif algorithm == "SC":
+#                 result = SC_algorithm(Values, distribution_type)
+#         elif algorithm =="EHKS":
+#                 result = EHKS_algorithm(Values, distribution_type)
+#         elif algorithm == "DP":
+#                 result = DP_algorithm(Values, distribution_type)
+#         if result != None:
+#             arrivalPositionsChosen[result] += 1
+#             chosenValues.append(Values[result])
+#             chosenValuesExcludeNone.append(Values[result])
             
-        if result == None: 
-            chosenValues.append(0)
-            nones += 1
+#         if result == None: 
+#             chosenValues.append(0)
+#             nones += 1
             
         
-    noneRate = nones/N_experimentReps
+#     noneRate = nones/N_experimentReps
         
-    return noneRate, sum(chosenValues)/N_experimentReps, sum(chosenValuesExcludeNone)/N_experimentReps, arrivalPositionsChosen, mean(chosenValues), mean(chosenValuesExcludeNone)
+#     return noneRate, mean(chosenValues), mean(chosenValuesExcludeNone), arrivalPositionsChosen
 
-df = pd.DataFrame(columns=['Parameter value', 'None rate', "Avg none’s as 0 value (in own group)", "None's excluded (in own group)"])
-for param in [1.0, 1.25,1.5,1.75,2.0]:
-    nonerate, avg_include, avg_exclude, chosen_positions, avg_include_own, avg_exclude_own = runExperimentExtended(algorithm="FairGeneralProphet", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50, parameter_value=param)
-    print("Nonerate: ", nonerate * 100, "%")
-#     print("Average value of the chosen candidate with none’s as 0 value (in whole group): ", avg_include)
-#     print("Average value of the chosen candidate with None's excluded (in whole group): ", avg_exclude)
+# df = pd.DataFrame(columns=['Parameter value', 'Avg None=0', "Avg discard none"])
+# for param in [1.0, 1.25,1.5,1.75,2.0]:
+#     nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairGeneralProphet", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50, parameter_value=param)
+#     print("Nonerate: ", nonerate * 100, "%")
+#     print("Average value of the chosen candidate with none’s as 0 value: ", avg_include)
+#     print("Average value of the chosen candidate with None's excluded: ", avg_exclude)
     
-    print("Average value of the chosen candidate with none’s as 0 value (in own group): ", avg_include_own)
-    print("Average value of the chosen candidate with None's excluded (in own group): ", avg_exclude_own)
+#     a_series = pd.Series([param,avg_include,avg_exclude], index = df.columns)
+#     df = df.append(a_series, ignore_index=True)
     
-    a_series = pd.Series([param,nonerate,avg_include_own,avg_exclude_own], index = df.columns)
-    df = df.append(a_series, ignore_index=True)
-    
-#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
+# #     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
 
-    plt.plot(range(0,50), chosen_positions, label= str(param))
-plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
-plt.legend()
+#     plt.plot(range(0,50), chosen_positions, label= str(param))
+# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+# plt.legend()
 
 # %%
-df
+# import pandas as pd
+
+# %%
+# df
 
 # %%
 # q, v = generateDistribution("binomial", 10)
