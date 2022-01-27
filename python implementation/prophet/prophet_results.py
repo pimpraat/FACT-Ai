@@ -42,6 +42,8 @@ arrivalPositionsChosenEHKS, d = runExperiment(algorithm="EHKS", N_experimentReps
 arrivalPositionsChosenDP, e = runExperiment(algorithm="DP", N_experimentReps=50000, 
                                                 distribution_type="uniform", n_candidates=50)
 
+plt.rcParams["figure.figsize"] = (8,3)
+plt.rcParams.update({'font.size': 14})
 plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
 plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
 plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
@@ -49,13 +51,13 @@ plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
 plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
 
 plt.grid(visible=True, linewidth=1)
-plt.rcParams["figure.figsize"] = (8,3)
 
-plt.title("50k experiments, discarding None results")
+# plt.title("50k experiments, discarding None results")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
-plt.legend(loc="best")
-plt.savefig("images/uniform_distribution/50kExperiments.png")
+plt.rcParams.update({'font.size': 12})
+plt.legend(loc="upper left", ncol=5)
+plt.savefig("images/uniform_distribution/50kExperiments_uniform.png")
 
 # %%
 #Plotting the results for 100k experiments
@@ -76,17 +78,20 @@ arrivalPositionsChosenDP, e = runExperiment(algorithm="DP", N_experimentReps=500
                                                 distribution_type="uniform", n_candidates=50)
 
 # %%
+plt.rcParams["figure.figsize"] = (8,3)
+plt.rcParams.update({'font.size': 14})
 plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
 plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
 plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
 plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
 plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
 plt.grid(visible=True, linewidth=.5)
-plt.title("100k experiments, discarding None results")
+# plt.title("100k experiments, discarding None results")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
-plt.legend(loc="best", ncol=1)
-plt.savefig("images/uniform_distribution/100kExperiments.png")
+plt.rcParams.update({'font.size': 12})
+plt.legend(loc="upper left", ncol=5)
+plt.savefig("images/uniform_distribution/100kExperiments_uniform.png")
 
 # %%
 #In order to save the legend
@@ -131,8 +136,8 @@ plt.plot(range(0,1000), load('data/EHKS_positions.npy'), label="EHKS")
 plt.plot(range(0,1000), load('data/DP_positions.npy'), label="DP")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
-plt.title("Binomial distribution with 1k candidates, and 50k experiments")
-plt.legend(loc="upper right")
-plt.savefig("images/binomial_distribution/binomial.png")
+# plt.title("Binomial distribution with 1k candidates, and 50k experiments")
+plt.legend(loc="upper left")
+plt.savefig("images/binomial_distribution/50kExperiments_binomial.png")
 
 # %%

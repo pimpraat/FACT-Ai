@@ -379,6 +379,9 @@ import pandas as pd
 def FairGeneralProphetExtended(q, V, distribution_type, parameter_value):
     s = 0.0
     for i in range(0,len(V)): #value < 1 reaches a drop!
+        
+        assert (1.0 - (q[i] / (2 - s))) == (1- (q[i]/2)/(1-(s/2)))
+        
         if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (parameter_value - s)))):
 #         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
             return i
@@ -387,7 +390,16 @@ def FairGeneralProphetExtended(q, V, distribution_type, parameter_value):
 def FairIIDProphetExtended(Values, distribution_type, parameter_value):
     for i in range(0, len(Values)):
         p = (2.0 / 3.0) / len(Values)
-        p = (2.0 / 2.0) / len(Values)
+        
+        ii = int(i)
+        n = len(Values)
+        
+#         print((1.0 - p / (1.0 - p * ii)))
+#         print((2 / 3*n) / (1 - 2*(ii-1)/3*n))
+        
+#         assert (1.0 - p / (1.0 - p * ii)) == (2/3*n)/(1-2(ii-1)/3*n)
+        
+        p = ((parameter_value) / 3.0) / len(Values)
         if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
             return i
         
@@ -421,10 +433,10 @@ def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_cand
         
     return noneRate, sum(chosenValues)/N_experimentReps, sum(chosenValuesExcludeNone)/N_experimentReps, arrivalPositionsChosen, mean(chosenValues), mean(chosenValuesExcludeNone)
 
-df = pd.DataFrame(columns=['Parameter value', 'None rate', "Avg none’s as 0 value (in own group)", "None's excluded (in own group)"])
-for param in [1.0, 1.25,1.5,1.75,2.0]:
-    nonerate, avg_include, avg_exclude, chosen_positions, avg_include_own, avg_exclude_own = runExperimentExtended(algorithm="FairGeneralProphet", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50, parameter_value=param)
+df = pd.DataFrame(columns=['Parameter value', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
+for param in [1.0, 1.25,1.5,1.75,2.0, 2.25, 2.5, 2.75, 3.0, 3.25 ,3.5]:
+    nonerate, avg_include, avg_exclude, chosen_positions, avg_include_own, avg_exclude_own = runExperimentExtended(algorithm="FairIIDProphet", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=100, parameter_value=param)
     print("Nonerate: ", nonerate * 100, "%")
 #     print("Average value of the chosen candidate with none’s as 0 value (in whole group): ", avg_include)
 #     print("Average value of the chosen candidate with None's excluded (in whole group): ", avg_exclude)
@@ -437,15 +449,13 @@ for param in [1.0, 1.25,1.5,1.75,2.0]:
     
 #     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
 
-    plt.plot(range(0,50), chosen_positions, label= str(param))
-plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
-plt.legend()
+    plt.plot(range(0,50), chosen_positions, label= str("γ = " + str(param)))
+# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+plt.xlabel("Arrival position")
+plt.ylabel("Num Picked")
+plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
+                mode="expand", borderaxespad=0, ncol=4)
+plt.save()
 
 # %%
 df
-
-# %%
-# q, v = generateDistribution("binomial", 10)
-# v
-
-# %%
