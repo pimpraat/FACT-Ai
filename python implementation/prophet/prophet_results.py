@@ -41,7 +41,7 @@ arrivalPositionsChosenEHKS, d = runExperiment(algorithm="EHKS", N_experimentReps
                                                 distribution_type="uniform", n_candidates=50)
 arrivalPositionsChosenDP, e = runExperiment(algorithm="DP", N_experimentReps=50000, 
                                                 distribution_type="uniform", n_candidates=50)
-
+plt.subplots_adjust(bottom=0.15)
 plt.rcParams["figure.figsize"] = (8,3)
 plt.rcParams.update({'font.size': 14})
 plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
@@ -58,6 +58,14 @@ plt.ylabel("Num Picked")
 plt.rcParams.update({'font.size': 12})
 plt.legend(loc="upper left", ncol=5)
 plt.savefig("images/uniform_distribution/50kExperiments_uniform.png")
+
+# %%
+print("The average value of the chosen candidate in the uniform distribution: \n")
+print("FairPA: ", round(mean(a),3), "(should be 0.501)")
+print("FairIID: ", round(mean(b),3), "(should be 0.661)")
+print("SK: ", round(mean(c),3), "(should be 0.499)")
+print("EHKS: ", round(mean(d),3), "(should be 0.631)")
+print("SP: ", round(mean(e),3), "(should be 0.751)")
 
 # %%
 #Plotting the results for 100k experiments
@@ -78,6 +86,7 @@ arrivalPositionsChosenDP, e = runExperiment(algorithm="DP", N_experimentReps=500
                                                 distribution_type="uniform", n_candidates=50)
 
 # %%
+plt.subplots_adjust(bottom=0.15)
 plt.rcParams["figure.figsize"] = (8,3)
 plt.rcParams.update({'font.size': 14})
 plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
@@ -129,15 +138,38 @@ print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b) / 
 
 
 # %%
+plt.subplots_adjust(bottom=0.15)
+plt.rcParams["figure.figsize"] = (8,3)
+plt.rcParams.update({'font.size': 14})
+
 plt.plot(range(0,1000), load('data/FairPA_positions.npy'), label="FairPA")
 plt.plot(range(0,1000), load('data/FairIID_positions.npy'), label="Fair IID")
 plt.plot(range(0,1000), load('data/SC_positions.npy'), label="SC")
 plt.plot(range(0,1000), load('data/EHKS_positions.npy'), label="EHKS")
 plt.plot(range(0,1000), load('data/DP_positions.npy'), label="DP")
+plt.grid(visible=True, linewidth=1)
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 # plt.title("Binomial distribution with 1k candidates, and 50k experiments")
-plt.legend(loc="upper left")
+plt.rcParams.update({'font.size': 12})
+plt.legend(loc="upper left", ncol=5)
 plt.savefig("images/binomial_distribution/50kExperiments_binomial.png")
+
+# %%
+plt.subplots_adjust(bottom=0.15)
+plt.rcParams["figure.figsize"] = (8,3)
+plt.rcParams.update({'font.size': 14})
+# plt.plot(range(0,1000), load('data/FairPA_positions100k.npy'), label="FairPA")
+# plt.plot(range(0,1000), load('data/FairIID_positions100k.npy'), label="Fair IID")
+plt.plot(range(0,1000), load('data/SC_positions100k.npy'), label="SC")
+plt.plot(range(0,1000), load('data/EHKS_positions100k.npy'), label="EHKS")
+# plt.plot(range(0,1000), load('data/DP_positions100k.npy'), label="DP")
+plt.grid(visible=True, linewidth=1)
+plt.xlabel("Arrival position")
+plt.ylabel("Num Picked")
+# plt.title("Binomial distribution with 1k candidates, and 50k experiments")
+plt.rcParams.update({'font.size': 12})
+plt.legend(loc="upper left", ncol=5)
+plt.savefig("images/binomial_distribution/100kExperiments_binomial.png")
 
 # %%
