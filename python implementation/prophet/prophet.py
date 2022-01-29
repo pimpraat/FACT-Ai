@@ -392,11 +392,11 @@ def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
 # save('data/EHKS_positions100k.npy', arrivalPositionsChosenEHKS)
 # save('data/EHKS_values100k.npy', EHKS_values)
 
-arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000*2, 
-                                                distribution_type="binomial", n_candidates=1000)
+# arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000*2, 
+#                                                 distribution_type="binomial", n_candidates=1000)
 
-save('data/DP_positions100k.npy', arrivalPositionsChosenDP)
-save('data/DP_values100k.npy', DP_values)
+# save('data/DP_positions100k.npy', arrivalPositionsChosenDP)
+# save('data/DP_values100k.npy', DP_values)
 
 
 # %% [markdown]
