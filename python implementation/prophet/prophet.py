@@ -433,31 +433,19 @@ import pandas as pd
 
 def FairGeneralProphetExtended(q, V, distribution_type, parameter_value):
     s = 0.0
-    for i in range(0,len(V)): #value < 1 reaches a drop!
-        
-        assert (1.0 - (q[i] / (2 - s))) == (1- (q[i]/2)/(1-(s/2)))
-        
-        if V[i] >= Finv(distribution_type, (1.0 - (q[i] / (parameter_value - s)))):
-#         if V[i] >= Finv(distribution_type, (1- (q[i]/2)/(1-(summ/2)))):
+    n = len(V)
+    for i in range(0,n): #value < 1 reaches a drop!
+        p = (1- (q[i]/2)/(parameter_value-(s/2)))
+        if V[i] >= Finv(distribution_type, p):
             return i
         s += q[i]
 
-def FairIIDProphetExtended(Values, distribution_type, parameter_value):
-    for i in range(0, len(Values)):
-        p = (2.0 / 3.0) / len(Values)
-        
-        ii = int(i)
-        n = len(Values)
-        
-#         print((1.0 - p / (1.0 - p * ii)))
-#         print((2 / 3*n) / (1 - 2*(ii-1)/3*n))
-#         TODO: FIX THESE INCONSISTENISE, USE OUR OWN DEFINITION
-#         assert (1.0 - p / (1.0 - p * ii)) == (2/3*n)/(1-2(ii-1)/3*n)
-        
-        p = (parameter_value / 3.0) / len(Values)
-        p = (parameter_value) / len(Values)
-        if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
-            return i
+def FairIIDProphetExtended(V, distribution_type, parameter_value):
+    n = len(V)
+    for i in range(0, n):
+        p = 1 - (2/(3*n)) / (parameter_value - 2*(i-1)/(3*n))
+        if V[i] >= Finv(distribution_type, p):
+                 return i
         
 def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_candidates, parameter_value):
     arrivalPositionsChosen, chosenValues, chosenValuesExcludeNone = [0]*n_candidates, [], []
@@ -469,12 +457,12 @@ def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_cand
                 result = FairGeneralProphetExtended(q, Values, distribution_type, parameter_value)
         elif algorithm == "FairIIDProphet":
                 result = FairIIDProphetExtended(Values, distribution_type, parameter_value)
-        elif algorithm == "SC":
-                result = SC_algorithm(Values, distribution_type)
-        elif algorithm =="EHKS":
-                result = EHKS_algorithm(Values, distribution_type)
-        elif algorithm == "DP":
-                result = DP_algorithm(Values, distribution_type)
+#         elif algorithm == "SC":
+#                 result = SC_algorithm(Values, distribution_type)
+#         elif algorithm =="EHKS":
+#                 result = EHKS_algorithm(Values, distribution_type)
+#         elif algorithm == "DP":
+#                 result = DP_algorithm(Values, distribution_type)
         if result != None:
             arrivalPositionsChosen[result] += 1
             chosenValues.append(Values[result])
@@ -487,32 +475,57 @@ def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_cand
         
     noneRate = nones/N_experimentReps
         
-    return noneRate, sum(chosenValues)/N_experimentReps, sum(chosenValuesExcludeNone)/N_experimentReps, arrivalPositionsChosen, mean(chosenValues), mean(chosenValuesExcludeNone)
+    return noneRate, mean(chosenValues), mean(chosenValuesExcludeNone), arrivalPositionsChosen
 
+# %%
+#Fair general prophet
 df = pd.DataFrame(columns=['Parameter value', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
-
-gridForUniformIID = [.25, .5, 2/3, .75, 1.0, 1.25, 1.5]
-gridForUniformGeneralProphet = [.75, 1, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5]
-
-for param in (gridForUniformGeneralProphet):
-    nonerate, avg_include, avg_exclude, chosen_positions, avg_include_own, avg_exclude_own = runExperimentExtended(algorithm="FairGeneralProphet", N_experimentReps=50000*2, 
-                                                distribution_type="uniform", n_candidates=50, parameter_value=param)
-    if param == 1/3:
-        param = str("0.66 (std)")
-        
-    if param == 2:
-        param = str("2 (std)")
-    df = df.append(pd.Series([param,nonerate,avg_include_own,avg_exclude_own], index = df.columns), ignore_index=True)
+for param in [1.2,1.0,0.5,0.3]:
+    nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="uniform", 
+                                                                                 n_candidates=50, 
+                                                                                 parameter_value=param
+                                                                                )
     
+    a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
+    df = df.append(a_series, ignore_index=True)
+    
+#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
 
     plt.plot(range(0,50), chosen_positions, label= str("γ = " + str(param)))
-plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
                 mode="expand", borderaxespad=0, ncol=4)
+plt.savefig("images/extensionFairPA_uniform.png")
+dfi.export(df, 'images/extenstionFairPA_table_uniform.png')
 
 # %%
-df
+#Fair IID prophet
+df = pd.DataFrame(columns=['Parameter value', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
+
+for param in [1.2,1.0,0.7,0.5]:
+    nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairIIDProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="uniform", 
+                                                                                 n_candidates=50, 
+                                                                                 parameter_value=param
+                                                                                )
+    
+    a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
+    df = df.append(a_series, ignore_index=True)
+    
+#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
+
+    plt.plot(range(0,50), chosen_positions, label= str("γ = " + str(param)))
+# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+plt.xlabel("Arrival position")
+plt.ylabel("Num Picked")
+plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
+                mode="expand", borderaxespad=0, ncol=4)
+plt.savefig("images/extensionFairIID_table_uniform.png")
+dfi.export(df, "images/extenstionFairIID_table_uniform.png")
 
 # %%
