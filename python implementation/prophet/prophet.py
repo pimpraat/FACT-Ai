@@ -29,6 +29,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from statistics import mean
 import pandas as pd
+import math
 
 from numpy import save
 from numpy import load
@@ -67,7 +68,7 @@ def calculatePreMiddleBinomial():
     x = n_combinations * probability * np.flip(r_probability) #calculating p of i successes in one try, by multiplying the p of this many successes, this many failures and all combinations in which they could have occurred
     x_cum = np.flip(np.cumsum(np.flip(x))) #calculating cumulative probability (p of getting at least i successes in one try)
 #     print("Value: " + np.flip(np.cumsum(np.flip(x))))
-    return np.flip(np.cumsum(np.flip(x)))
+    return np.flip(np.cumsum(np.flip(x))), probability, r_probability, choose
 
 def middleBinomial(n, x_cum_prepared):
     n_candidates = n
@@ -121,13 +122,51 @@ def Middle(distribution_type, n, x_cum):
         rrange = 1.0
         return rrange * np.power(1.0 / 2, 1.0 / n)
     if distribution_type == "binomial":
-        return middleBinomial(n, x_cum)
+        return middleBinomial(n, x_cum)[0]
         
+
+# lower bound is 0?
+def Expected(lower_bound):
+    ans, rangge = 0.0 , 0.0
+    n = 1000-1
+    
+    ## begin import ##
+    
+    _ , probability_ , r_probability_ , choose_= calculatePreMiddleBinomial()
+    
+    ## end import ##
+    
+    for i in range(math.ceil(lower_bound * n), n-1, 1):
+        ans += (probability_[i] * r_probability_[n - i] * choose_[n][i] * i) / n;
+        rangge += probability_[i] * r_probability_[n - i] * choose_[n][i];
+    return ans / rangge
+    
+#     double ans = 0;
+#   double range = 0;
+#   int n = probability_.size() - 1;
+#   for (int i = ceil(lower_bound * n); i <= n; i++) {
+#     ans += probability_[i] * r_probability_[n - i] * choose_[n][i] * i / n;
+#     range += probability_[i] * r_probability_[n - i] * choose_[n][i];
+#   }
+#   return ans / range;
+
 def PThreshold(distribution_type, n_candidates):
     if distribution_type == "uniform":
-        
+        V = [0.0]*n_candidates
+        V[n_candidates - 1] = .5
+        p_th_ = [0.0]*n_candidates
+        for i in range(n_candidates-2, -1, -1):
+            p_th_[i] = V[i+1]
+            V[i] = (1+p_th_[i])/2
+        return p_th_
     if distribution_type == "binomial":
-        assert NotImplementedError
+        V = [0.0]*n_candidates
+        V[n_candidates - 1] = Expected(0)
+        p_th_ = [0.0]*n_candidates
+        for i in range(n_candidates-2, -1, -1):
+            p_th_[i] = V[i+1]
+            V[i] = Expected(p_th_[i])
+        return p_th_
     
         
 def FairGeneralProphet (q, V, distribution_type):
@@ -144,6 +183,7 @@ def FairIIDProphet(Values, distribution_type):
         if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
             return i
 
+PThreshold("binomial", 10)
 
 
 # %%
@@ -177,7 +217,16 @@ def DP_algorithm(Values, distribution_type):
     for i in range(0, len(Values)):
         if Values[i] >= Finv(distribution_type, np.power(diff_solution[i], (1.0 / (len(Values) - 1)))):
             return i
-
+        
+        
+def DP_algorithmNEW(Values, distribution_type):
+    pttth = PThreshold(distribution_type, len(Values))
+    print(pttth)
+    for i in range(0, len(Values)):
+        if Values[i] >= pttth[i]:
+            return i
+        
+DP_algorithmNEW(generateDistribution("binomial", 20)[1], "binomial")
 
 # %% [markdown]
 # ## The experiments
@@ -244,6 +293,9 @@ def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
             
         if result == None: chosenValues.append(0)
     return arrivalPositionsChosen, chosenValues
+
+# %%
+DP_algorithmNEW(generateDistribution("uniform", 20)[1], "uniform")
 
 # %%
 # #Plotting the results for 50k experiments
