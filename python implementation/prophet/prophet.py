@@ -35,6 +35,7 @@ from numpy import save
 from numpy import load
 
 from tqdm import tqdm # for the progress bar
+import dataframe_image as dfi
 
 
 # %% [markdown]
@@ -72,29 +73,6 @@ def calculatePreMiddleBinomial():
 
 def middleBinomial(n, x_cum_prepared):
     n_candidates = n
-#     n = 1000
-#     p = 0.5 #probability of coin succeeding
-#     choose = np.zeros((n+1,n+1)) # creating 'choose' variable -> number of combinations per number of successes
-#     for i in range(n+1):
-#         choose[i,0] = 1
-
-#     for i in range(1,n+1):
-#         for j in range(1,n+1):
-#             choose[i,j] = choose[i-1,j-1] + choose[i-1,j]
-
-#     n_combinations = choose[-1]
-#     probability = np.ones((n+1)) #probability of n successes
-#     r_probability = np.ones((n+1)) #reverse probability of n failures
-
-#     for i in range(1,n+1):
-#         probability[i] = probability[i - 1] * p
-#         r_probability[i] = r_probability[i - 1] * (1 - p);
-        
-        
-#     #max dist --> chance of getting at least certain amount of successes after all candidates
-#     x = n_combinations * probability * np.flip(r_probability) #calculating p of i successes in one try, by multiplying the p of this many successes, this many failures and all combinations in which they could have occurred
-#     x_cum = np.flip(np.cumsum(np.flip(x))) #calculating cumulative probability (p of getting at least i successes in one try)
-#     print(x_cum_prepared)
     max_dist = 1 - pow(1-x_cum_prepared, n_candidates) #p of getting i successes after certain amount of tries
 
     #middle --> find highest number of successes where probability of reaching at least that is more than 0.5
@@ -125,30 +103,15 @@ def Middle(distribution_type, n, x_cum):
         return middleBinomial(n, x_cum)[0]
         
 
-# lower bound is 0?
 def Expected(lower_bound):
     ans, rangge = 0.0 , 0.0
-    n = 1000-1
-    
-    ## begin import ##
-    
-    _ , probability_ , r_probability_ , choose_= calculatePreMiddleBinomial()
-    
-    ## end import ##
-    
+    n = 1000-1 
+    _, probability_ , r_probability_ , choose_= calculatePreMiddleBinomial()
+
     for i in range(math.ceil(lower_bound * n), n-1, 1):
         ans += (probability_[i] * r_probability_[n - i] * choose_[n][i] * i) / n;
         rangge += probability_[i] * r_probability_[n - i] * choose_[n][i];
     return ans / rangge
-    
-#     double ans = 0;
-#   double range = 0;
-#   int n = probability_.size() - 1;
-#   for (int i = ceil(lower_bound * n); i <= n; i++) {
-#     ans += probability_[i] * r_probability_[n - i] * choose_[n][i] * i / n;
-#     range += probability_[i] * r_probability_[n - i] * choose_[n][i];
-#   }
-#   return ans / range;
 
 def PThreshold(distribution_type, n_candidates):
     if distribution_type == "uniform":
@@ -161,7 +124,7 @@ def PThreshold(distribution_type, n_candidates):
         return p_th_
     if distribution_type == "binomial":
         V = [0.0]*n_candidates
-        V[n_candidates - 1] = Expected(0)
+        V[n_candidates - 1] = Expected(0, pre_calculated)
         p_th_ = [0.0]*n_candidates
         for i in range(n_candidates-2, -1, -1):
             p_th_[i] = V[i+1] #TOOD NOTE
@@ -183,8 +146,6 @@ def FairIIDProphet(Values, distribution_type):
         if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
             return i
 
-PThreshold("binomial", 10)
-
 
 # %%
 # Implemented according to the function “ComputeSolutionOneHalf” in unfair-prophet.cc
@@ -203,7 +164,7 @@ def EHKS_algorithm(Values, distribution_type):
             return i
 
 # Implemented according to the function “ComputeSolutionDiffEq” in unfair-prophet.cc
-def DP_algorithm(Values, distribution_type):
+def CFHOV_algorithm(Values, distribution_type):
 #     TODO: still need to figure out if these precomputed thresholds hold!
 
     diff_solution_50 = np.loadtxt("diff_solution_50.txt", delimiter=", ")
@@ -219,14 +180,12 @@ def DP_algorithm(Values, distribution_type):
             return i
         
         
-def DP_algorithmNEW(Values, distribution_type):
+def DP_algorithm(Values, distribution_type):
     pttth = PThreshold(distribution_type, len(Values))
-    print(pttth)
     for i in range(0, len(Values)):
-        if Values[i] >= pttth[i]*1000:
+        if Values[i] >= (pttth[i])*1000:
             return i
-        
-DP_algorithmNEW(generateDistribution("binomial", 20)[1], "binomial")
+
 
 # %% [markdown]
 # ## The experiments
@@ -283,6 +242,8 @@ def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
                 result = SC_algorithm(Values, distribution_type, x_cummm)
         elif algorithm =="EHKS":
                 result = EHKS_algorithm(Values, distribution_type)
+        elif algorithm == "CFHOV":
+                result = CFHOV_algorithm(Values, distribution_type)
         elif algorithm == "DP":
                 result = DP_algorithm(Values, distribution_type)
                 
@@ -295,36 +256,37 @@ def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
     return arrivalPositionsChosen, chosenValues
 
 # %%
-# generateDistribution("uniform", 20)
-DP_algorithmNEW(generateDistribution("uniform", 20)[1], "uniform")
+#Plotting the results for 50k experiments
 
-# %%
-# #Plotting the results for 50k experiments
+arrivalPositionsChosenFairPA, a_50k_uniform = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
+                                                distribution_type="uniform", n_candidates=50)
+    
+arrivalPositionsChosenFairIID, b_50k_uniform = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
+                                                distribution_type="uniform", n_candidates=50)
+    
+arrivalPositionsChosenSC, c_50k_uniform = runExperiment(algorithm="SC", N_experimentReps=50000, 
+                                                distribution_type="uniform", n_candidates=50)
+    
+arrivalPositionsChosenEHKS, d_50k_uniform = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
+                                                distribution_type="uniform", n_candidates=50)
 
-# arrivalPositionsChosenFairPA, a = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
-#                                                 distribution_type="uniform", n_candidates=50)
-    
-# arrivalPositionsChosenFairIID, b = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
-#                                                 distribution_type="uniform", n_candidates=50)
-    
-# arrivalPositionsChosenSC, c = runExperiment(algorithm="SC", N_experimentReps=50000, 
-#                                                 distribution_type="uniform", n_candidates=50)
-    
-# arrivalPositionsChosenEHKS, d = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
-#                                                 distribution_type="uniform", n_candidates=50)
-# arrivalPositionsChosenDP, e = runExperiment(algorithm="DP", N_experimentReps=50000, 
-#                                                 distribution_type="uniform", n_candidates=50)
+arrivalPositionsChosenCFHOV, e_50k_uniform = runExperiment(algorithm="CFHOV", N_experimentReps=50000, 
+                                                distribution_type="uniform", n_candidates=50)
 
-# plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
-# plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
-# plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
-# plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
+arrivalPositionsChosenDP, f_50k_uniform = runExperiment(algorithm="DP", N_experimentReps=50000, 
+                                                distribution_type="uniform", n_candidates=50)
+
+plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
+plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
+plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
+plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
 # plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
-# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
-# plt.title("50k experiments, discarding None results")
-# plt.xlabel("Arrival position")
-# plt.ylabel("Num Picked")
-# plt.legend(loc="upper right")
+plt.plot(range(0,50), arrivalPositionsChosenCFHOV, label="CFHOV")
+plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+plt.title("50k experiments, discarding None results")
+plt.xlabel("Arrival position")
+plt.ylabel("Num Picked")
+plt.legend(loc="upper right")
 # plt.savefig("images/50kExperiments.png")
 
 # %% [markdown]
@@ -361,6 +323,8 @@ DP_algorithmNEW(generateDistribution("uniform", 20)[1], "uniform")
 # print("EHKS: ", mean(d), "(should be 0.631)")
 # print("SP: ", mean(e), "(should be 0.751)")
 
+
+
 # %% [markdown]
 #
 # **Statement 1:** _In conclusion, for both settings, both our algorithms Algorithm 2 and Algorithm 3 provide perfect fairness, while giving 66.71% and 88.01% (for the uniform case), and 58.12% and 75.82% (for the binomial case), of the value of the optimal, but unfair, online algorithm._
@@ -369,11 +333,11 @@ DP_algorithmNEW(generateDistribution("uniform", 20)[1], "uniform")
 #
 
 # %%
-# print("Uniform case, for FairPA")
-# print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(a) / mean(e) *100, "%")
+print("Uniform case, for FairPA")
+print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(a_50k_uniform) / mean(e_50k_uniform) *100, "%")
 
-# print("\n Uniform case, for FairIID")
-# print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b) / mean(e) *100, "%")
+print("\n Uniform case, for FairIID")
+print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b_50k_uniform) / mean(e_50k_uniform) * 100, "%")
 
 
 

@@ -24,6 +24,7 @@ from ipynb.fs.defs.prophet import runExperiment
 import matplotlib.pyplot as plt
 from statistics import mean
 from numpy import load, save
+import dataframe_image as dfi
 
 # %%
 #Plotting the results for 50k experiments
@@ -39,8 +40,12 @@ arrivalPositionsChosenSC, c_50k_uniform = runExperiment(algorithm="SC", N_experi
     
 arrivalPositionsChosenEHKS, d_50k_uniform = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
                                                 distribution_type="uniform", n_candidates=50)
-arrivalPositionsChosenDP, e_50k_uniform = runExperiment(algorithm="DP", N_experimentReps=50000, 
+
+arrivalPositionsChosenCFHOV, e_50k_uniform = runExperiment(algorithm="CFHOV", N_experimentReps=50000, 
                                                 distribution_type="uniform", n_candidates=50)
+
+# arrivalPositionsChosenDP, f_50k_uniform = runExperiment(algorithm="DP", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50)
 plt.subplots_adjust(bottom=0.25)
 plt.rcParams["figure.figsize"] = (8,3)
 plt.rcParams.update({'font.size': 14})
@@ -48,7 +53,8 @@ plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
 plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
 plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
 plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
-plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
+# plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
+plt.plot(range(0,50), arrivalPositionsChosenCFHOV, label="CFHOV")
 
 plt.grid(visible=True, linewidth=1)
 
