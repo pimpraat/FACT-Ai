@@ -164,7 +164,7 @@ def PThreshold(distribution_type, n_candidates):
         V[n_candidates - 1] = Expected(0)
         p_th_ = [0.0]*n_candidates
         for i in range(n_candidates-2, -1, -1):
-            p_th_[i] = V[i+1]
+            p_th_[i] = V[i+1] #TOOD NOTE
             V[i] = Expected(p_th_[i])
         return p_th_
     
@@ -223,7 +223,7 @@ def DP_algorithmNEW(Values, distribution_type):
     pttth = PThreshold(distribution_type, len(Values))
     print(pttth)
     for i in range(0, len(Values)):
-        if Values[i] >= pttth[i]:
+        if Values[i] >= pttth[i]*1000:
             return i
         
 DP_algorithmNEW(generateDistribution("binomial", 20)[1], "binomial")
@@ -295,6 +295,7 @@ def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
     return arrivalPositionsChosen, chosenValues
 
 # %%
+# generateDistribution("uniform", 20)
 DP_algorithmNEW(generateDistribution("uniform", 20)[1], "uniform")
 
 # %%
@@ -489,6 +490,7 @@ def FairIIDProphetExtended(Values, distribution_type, parameter_value):
 #         TODO: FIX THESE INCONSISTENISE, USE OUR OWN DEFINITION
 #         assert (1.0 - p / (1.0 - p * ii)) == (2/3*n)/(1-2(ii-1)/3*n)
         
+        p = (parameter_value / 3.0) / len(Values)
         p = (parameter_value) / len(Values)
         if Values[i] >= Finv(distribution_type, (1.0 - p / (1.0 - p * i))):
             return i
@@ -524,23 +526,23 @@ def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_cand
     return noneRate, sum(chosenValues)/N_experimentReps, sum(chosenValuesExcludeNone)/N_experimentReps, arrivalPositionsChosen, mean(chosenValues), mean(chosenValuesExcludeNone)
 
 df = pd.DataFrame(columns=['Parameter value', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
-for param in [1.0, 1.25,1.5,1.75,2.0, 2.25, 2.5, 2.75, 3.0, 3.25 ,3.5]:
-    nonerate, avg_include, avg_exclude, chosen_positions, avg_include_own, avg_exclude_own = runExperimentExtended(algorithm="FairIIDProphet", N_experimentReps=50000, 
+
+gridForUniformIID = [.25, .5, 2/3, .75, 1.0, 1.25, 1.5]
+gridForUniformGeneralProphet = [.75, 1, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5]
+
+for param in (gridForUniformGeneralProphet):
+    nonerate, avg_include, avg_exclude, chosen_positions, avg_include_own, avg_exclude_own = runExperimentExtended(algorithm="FairGeneralProphet", N_experimentReps=50000*2, 
                                                 distribution_type="uniform", n_candidates=50, parameter_value=param)
-    print("Nonerate: ", nonerate * 100, "%")
-#     print("Average value of the chosen candidate with none’s as 0 value (in whole group): ", avg_include)
-#     print("Average value of the chosen candidate with None's excluded (in whole group): ", avg_exclude)
+    if param == 1/3:
+        param = str("0.66 (std)")
+        
+    if param == 2:
+        param = str("2 (std)")
+    df = df.append(pd.Series([param,nonerate,avg_include_own,avg_exclude_own], index = df.columns), ignore_index=True)
     
-    print("Average value of the chosen candidate with none’s as 0 value (in own group): ", avg_include_own)
-    print("Average value of the chosen candidate with None's excluded (in own group): ", avg_exclude_own)
-    
-    a_series = pd.Series([param,nonerate,avg_include_own,avg_exclude_own], index = df.columns)
-    df = df.append(a_series, ignore_index=True)
-    
-#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
 
     plt.plot(range(0,50), chosen_positions, label= str("γ = " + str(param)))
-# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
