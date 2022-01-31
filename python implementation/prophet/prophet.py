@@ -123,6 +123,12 @@ def Middle(distribution_type, n, x_cum):
     if distribution_type == "binomial":
         return middleBinomial(n, x_cum)
         
+def PThreshold(distribution_type, n_candidates):
+    if distribution_type == "uniform":
+        
+    if distribution_type == "binomial":
+        assert NotImplementedError
+    
         
 def FairGeneralProphet (q, V, distribution_type):
     summ = 0.0
