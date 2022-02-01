@@ -1,72 +1,104 @@
 import numpy as np
+from data import SecretaryInstance
 
 
-def secretary_algorithm(all_candidates, candidates_color, max_colors):
+def secretary_algorithm(all_candidates, max_colors):
+    """This method runs the first baseline: the Secretary Algorithm
 
-    stop_rule = round(len(all_candidates)/np.e)
-    max_value = max(all_candidates[:stop_rule])
+    Args:
+        all_candidates ([SecretaryInstance]): List of all candidates
+        max_colors ([string]): List of names of all groups
+
+    Returns:
+        SecretaryInstance: The selected candidate
+    """
+
+    stop_rule = round(len(all_candidates) / np.e)
+    max_value = np.max([item.score for item in all_candidates[:stop_rule]])
 
     try:
-        best_candidate = next(x for x in all_candidates[stop_rule:] if x > max_value)
+        best_candidate = next(x for x in all_candidates[stop_rule:] if x.score > max_value)
+        best_candidate.ismax = best_candidate.score == max_colors[best_candidate.color]
     except StopIteration:
-        best_candidate = all_candidates[-1]
+        best_candidate = SecretaryInstance(-1, -1, None)
 
-    winning_color = candidates_color[list(all_candidates).index(best_candidate)]
+    return best_candidate
 
-    return best_candidate, winning_color, best_candidate == max_colors[winning_color]
+def one_color_secretary_algorithm(candidates, max_colors, *args):
+    """This method runs the second baseline: the One Color Secretary Algorithm
 
-def one_color_secretary_algorithm(candidates_per_group, candidates_color, max_colors):
+    Args:
+        all_candidates ([SecretaryInstance]): List of all candidates
+        max_colors ([string]): List of names of all groups
+        args (tuple): Necessary arguments, namely the list of colors, probabilities and size of groups
+
+    Returns:
+        SecretaryInstance: The selected candidate
+    """
     
+    colors, probabilities = args[0], args[1]
     rand_balanced = np.random.rand()
 
-    for color in candidates_per_group.keys():
+    for i in range(len(probabilities)):
         
-        current_group = candidates_per_group[color]
-        if rand_balanced <= current_group[1]:
-            winning_color = color
+        if rand_balanced <= probabilities[i]:
+            winning_group = [x for x in candidates if x.color == colors[i]]
             break
         
-        rand_balanced -= current_group[1]
+        rand_balanced -= probabilities[i]
             
-    best_candidate, _, _ = secretary_algorithm(current_group[0], candidates_color, max_colors)
+    best_candidate = secretary_algorithm(winning_group, max_colors)
     
-    return best_candidate, winning_color, best_candidate == max_colors[winning_color]
+    try:
+        best_candidate.ismax = best_candidate.score == max_colors[best_candidate.color]
+    except KeyError:
+        best_candidate.ismax = False
 
-def multiple_color_secretary_algorithm(all_candidates, candidates_color, max_colors, *args):
+    return best_candidate
+
+def multiple_color_secretary_algorithm(candidates, max_colors, *args):
+    """This method runs the fair opt algorithm: the Multiple Color Secretary Algorithm
+
+    Args:
+        all_candidates ([SecretaryInstance]): List of all candidates
+        max_colors ([string]): List of names of all groups
+        args (tuple): Necessary arguments, namely the list of colors, probabilities and size of groups
+
+    Returns:
+        SecretaryInstance: The selected candidate
+    """
     
-    colors, thresholds, n = args[0], args[1], args[2]
-    
-#     for i in range(len(thresholds)):
-#         thresholds[i] = thresholds[i] * n[i]
-        
+    colors, thresholds = args[0], args[1]
     max_until_threshold = [0] * len(colors)
-    current_color_index = [0] * len(colors)
     
-    for i in range(0, len(all_candidates)):
+    for i in range(len(candidates)):
 
-        current_color = candidates_color[i]
-        if current_color_index[colors.index(current_color)] < thresholds[colors.index(current_color)]:
-            max_until_threshold[colors.index(current_color)] = max(max_until_threshold[colors.index(current_color)], all_candidates[i])
-            current_color_index[colors.index(current_color)] += 1
+        color_index = colors.index(candidates[i].color)
+        if i < thresholds[color_index]:
+            max_until_threshold[color_index] = max(max_until_threshold[color_index], candidates[i].score)
 
-    for i in range(0, len(all_candidates)):
+        if i >= thresholds[color_index] and candidates[i].score >= max_until_threshold[color_index]:
+            candidates[i].ismax = candidates[i].score == max_colors[candidates[i].color]
+            return candidates[i]
 
-        current_color = candidates_color[i]
-        if current_color_index[colors.index(current_color)] >= thresholds[colors.index(current_color)]:
-
-            if all_candidates[i] >= max_until_threshold[colors.index(current_color)]:
-                return all_candidates[i], current_color, all_candidates[i] == max_colors[current_color]
-
-    return all_candidates[-1], current_color, all_candidates[-1] == max_colors[current_color]
+    return SecretaryInstance(-1, -1, None)
 
 def multiple_color_thresholds(p):
+    """Helper function for the fair opt algorithm. Receives probabilities and converts them to threshold
+
+    Args:
+        p ([float]): The groups probability of being selected
+
+    Returns:
+        t ([float]): A percentage threshold to be used in the main algorithm
+    """
     
     t = [0] * len(p)
     k = len(p)
     
     t[k-1] = np.power((1 - (k - 1) * p[k - 1]), (1 / (k - 1)))
     
-    for j in range(k-2, 0, -1): #this is equivalent to 2 <= i <= k-1
+    for j in range(k-2, 0, -1):
         
         sum = np.sum([p[r] for r in range(0, j+1)])
         sum /= j
