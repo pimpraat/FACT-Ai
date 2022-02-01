@@ -1,68 +1,56 @@
 import random
 import pickle
 import numpy as np
-from itertools import repeat
-from data import get_synthetic_data, get_bank_data
+from data import get_synthetic_data, get_bank_data, get_pokec_data
 from secretary import secretary_algorithm, one_color_secretary_algorithm, multiple_color_secretary_algorithm, multiple_color_thresholds
 
 
-def shuffle_input(candidates, color_per_candidate):
-    
-    color_matching = list(zip(candidates, color_per_candidate))
-    random.shuffle(color_matching)
-    
-    return zip(*color_matching)
+def secretary_experiment(candidates, *args):
+    """Runs three secretary algorithms on the given data: Two baselines, namely the Secretary Algorithm and the
+    Single Color Secretary Algorithm; One fair optim algorithm names Multiple Color Secretary Algorithm
 
-def shuffle_within_group(candidates_per_group):
+    Args:
+        candidates ([SecretaryInstance]): List of SecretaryInstance objects; each instance contains the candidate's score, color and group probability
+        args (tuple): Necessary arguments, namely the list of colors, probabilities and size of groups
 
-    for v in candidates_per_group.values():
-        random.shuffle(v[0])
-        
-    return candidates_per_group
-    
-def secretary_experiment(candidates_per_group, *args):
-    
+    Returns:
+        tuple: Chosen candidates by the Secretary Algorithm
+        tuple: Chosen candidates by the Single Color Secretary Algorithm
+        tuple: Chosen candidates by the Multiple Color Secretary Algorithm
+    """
+
     colors, probabilities, n = args[0], args[1], args[2]
-    
-    all_candidates = np.concatenate([v[0] for v in candidates_per_group.values()])
     thresholds = multiple_color_thresholds(probabilities)
-
+    n_iterations = 20000
+    
     for i in range(len(thresholds)):
-        thresholds[i] = np.round(thresholds[i] * n[i])
-    print(thresholds)
+        thresholds[i] = int(thresholds[i] * sum(n))
 
     results_SA, results_SCSA, results_MCSA = [], [], []
-    
-    candidates_color = []
+
     max_colors = {color: None for color in colors}
+    for color in colors:
+        max_colors[color] = np.max([x.score for x in candidates if x.color == color])
 
-    for color in list(candidates_per_group.keys()):
-        candidates_color.extend(repeat(color, len(candidates_per_group[color][0])))
-        max_colors[color] = max(candidates_per_group[color][0])
-
-    for i in range(20000):
+    for i in range(n_iterations):
         
         if i % 1000 == 0:
-            print(i, "K")
+            print(i % 1000, "K")
 
-        all_candidates, candidates_color = shuffle_input(all_candidates, candidates_color)
-        result_SA = secretary_algorithm(all_candidates, candidates_color, max_colors)
+        random.shuffle(candidates)
+        result_SA = secretary_algorithm(candidates, max_colors)
         results_SA.append(result_SA)
         
-        shuffle_within_group(candidates_per_group)
-        result_SCSA = one_color_secretary_algorithm(candidates_per_group, candidates_color, max_colors)
+        result_SCSA = one_color_secretary_algorithm(candidates, max_colors, colors, probabilities)
         results_SCSA.append(result_SCSA)
     
-        result_MCSA = multiple_color_secretary_algorithm(all_candidates, candidates_color, max_colors, colors, thresholds, n)
+        result_MCSA = multiple_color_secretary_algorithm(candidates, max_colors, colors, thresholds)
         results_MCSA.append(result_MCSA)
-
-    # evaluation("SA", results_SA, colors, n)
-    # evaluation("SCSA", results_SCSA, colors, n)
-    # evaluation("MCSA", results_MCSA, colors, n)
 
     return results_SA, results_SCSA, results_MCSA
 
 def synthetic_experiment():
+    """Sets parameters and runs the synthetic data experiment"""
     
     colors = ['red', 'green', 'blue', 'yellow']
     probabilities = [0.25, 0.25, 0.25, 0.25]
@@ -70,45 +58,92 @@ def synthetic_experiment():
     
     synthetic_data = get_synthetic_data(colors, probabilities, n)
     results = secretary_experiment(synthetic_data, colors, probabilities, n)
-    
+
     return results
 
 def unbalanced_synthetic_experiment():
+    """Sets parameters and runs the unbalanced synthetic data experiment"""
 
     colors = ['red', 'green', 'blue', 'yellow']
     probabilities = [0.3, 0.25, 0.25, 0.2]
     n = [10, 100, 1000, 10000]
-    
+
     synthetic_data = get_synthetic_data(colors, probabilities, n)
     results = secretary_experiment(synthetic_data, colors, probabilities, n)
     
     return results
     
-def bank_experiment():
+def bank_experiment(path):
+    """Sets parameters and runs the feedback maximization experiment
+
+    Args:
+        path (string): Directory for reading data and writing results
+    """
     
-    probabilities = [0.2, 0.21, 0.22, 0.23, 0.24]
-    path = 'bank_raw.csv'
+    colors = ["under 30", "31-40", "41-50", "51-60", "over 60"]
+    probabilities = [0.2, 0.2, 0.2, 0.2, 0.2]
     n = []
-    bank_data = get_bank_data(path, probabilities)
 
-    for values in bank_data.values():
-        n.append(len(values[0]))
+    bank_data, n = get_bank_data(path, colors, probabilities)
         
-    results = secretary_experiment(bank_data, _, probabilities, n)
+    results = secretary_experiment(bank_data, colors, probabilities, n)
     
-    return results
+    return results, n
 
-# def InfMaxExperiment():
-#     return 0
+def pokec_experiment(path):
+    """Sets parameters and runs the influence maximization experiment
 
+    Args:
+        path (string): Directory for reading data and writing results
+    """
 
-def run_experiments():
+    colors = ["Under", "Normal", "Over", "Obese 1", "Obese 2"]
+    
+    probabilities = [0.2, 0.2, 0.2, 0.2, 0.2]
+    n = []
+
+    # pokec_data, n = get_pokec_data(path + 'soc-pokec-profiles.txt', path + 'soc-pokec-relationships.txt', colors, probabilities)
+    
+    # with open(path + 'data/pokec_dataset.pickle', 'wb') as f:
+    #     pickle.dump(pokec_data, f)
+        
+
+    with open(path + 'data/pokec_dataset.pickle', 'rb') as f:
+        pokec_data = pickle.load(f)
+
+    for i in range(len(colors)):
+        n.append(len([item.color for item in pokec_data if item.color == colors[i]]))
+
+    results = secretary_experiment(pokec_data, colors, probabilities, n)
+    
+    return results, n
+
+def run_experiments(path):
+    """Runs all four experiments for the Secretary Problem
+
+    Args:
+        path (string): Directory for reading data and writing results
+    """
     
     results = synthetic_experiment()
     results2 = unbalanced_synthetic_experiment()
+    results3, n_bank = bank_experiment(path + 'data/bank_raw.csv')
+    results4, n_pokec = pokec_experiment(path)
     
-    with open('results_synthetic1.pickle', 'wb') as f:
+    with open(path + 'results/results_synthetic1.pickle', 'wb') as f:
         pickle.dump(results, f)
         
-    with open('results_synthetic2.pickle', 'wb') as f:
+    with open(path + 'results/results_synthetic2.pickle', 'wb') as f:
         pickle.dump(results2, f)
+        
+    with open(path + 'results/results_bank.pickle', 'wb') as f:
+        pickle.dump(results3, f)
+        
+    with open(path + 'results/results_bank_args.pickle', 'wb') as f:
+        pickle.dump(n_bank, f)
+        
+    with open(path + 'results/results_pokec.pickle', 'wb') as f:
+        pickle.dump(results4, f)
+        
+    with open(path + 'results/results_pokec_args.pickle', 'wb') as f:
+        pickle.dump(n_pokec, f)
