@@ -69,7 +69,7 @@ def calculatePreMiddleBinomial():
     x = n_combinations * probability * np.flip(r_probability) #calculating p of i successes in one try, by multiplying the p of this many successes, this many failures and all combinations in which they could have occurred
     x_cum = np.flip(np.cumsum(np.flip(x))) #calculating cumulative probability (p of getting at least i successes in one try)
 #     print("Value: " + np.flip(np.cumsum(np.flip(x))))
-    return np.flip(np.cumsum(np.flip(x))), probability, r_probability, choose
+    return np.flip(np.cumsum(np.flip(x))), [probability, r_probability, choose]
 
 def middleBinomial(n, x_cum_prepared):
     n_candidates = n
@@ -103,17 +103,17 @@ def Middle(distribution_type, n, x_cum):
         return middleBinomial(n, x_cum)[0]
         
 
-def Expected(lower_bound):
+def Expected(lower_bound, precalculated):
     ans, rangge = 0.0 , 0.0
     n = 1000-1 
-    _, probability_ , r_probability_ , choose_= calculatePreMiddleBinomial()
+    probability_ , r_probability_ , choose_= precalculated
 
     for i in range(math.ceil(lower_bound * n), n-1, 1):
         ans += (probability_[i] * r_probability_[n - i] * choose_[n][i] * i) / n;
         rangge += probability_[i] * r_probability_[n - i] * choose_[n][i];
     return ans / rangge
 
-def PThreshold(distribution_type, n_candidates):
+def PThreshold(distribution_type, n_candidates, precalculated):
     if distribution_type == "uniform":
         V = [0.0]*n_candidates
         V[n_candidates - 1] = .5
@@ -124,11 +124,11 @@ def PThreshold(distribution_type, n_candidates):
         return p_th_
     if distribution_type == "binomial":
         V = [0.0]*n_candidates
-        V[n_candidates - 1] = Expected(0, pre_calculated)
+        V[n_candidates - 1] = Expected(0, precalculated)
         p_th_ = [0.0]*n_candidates
         for i in range(n_candidates-2, -1, -1):
             p_th_[i] = V[i+1] #TOOD NOTE
-            V[i] = Expected(p_th_[i])
+            V[i] = Expected(p_th_[i], precalculated)
         return p_th_
     
         
@@ -180,8 +180,8 @@ def CFHOV_algorithm(Values, distribution_type):
             return i
         
         
-def DP_algorithm(Values, distribution_type):
-    pttth = PThreshold(distribution_type, len(Values))
+def DP_algorithm(Values, distribution_type, precalculated):
+    pttth = PThreshold(distribution_type, len(Values), precalculated)
     for i in range(0, len(Values)):
         if Values[i] >= (pttth[i])*1000:
             return i
@@ -226,8 +226,8 @@ def generateDistribution(distribution_type, size):
 def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
     arrivalPositionsChosen, chosenValues = [0]*n_candidates, []
     
-    if (algorithm == "SC") and (distribution_type == "binomial"):
-        x_cummm = calculatePreMiddleBinomial()
+    if (algorithm == "SC" or algorithm == "DP") and (distribution_type == "binomial"):
+        x_cummm, precalculated = calculatePreMiddleBinomial()
     else:
         x_cummm = None
         
@@ -245,7 +245,7 @@ def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
         elif algorithm == "CFHOV":
                 result = CFHOV_algorithm(Values, distribution_type)
         elif algorithm == "DP":
-                result = DP_algorithm(Values, distribution_type)
+                result = DP_algorithm(Values, distribution_type, precalculated)
                 
                 
         if result != None:
@@ -256,38 +256,38 @@ def runExperiment(algorithm, N_experimentReps, distribution_type, n_candidates):
     return arrivalPositionsChosen, chosenValues
 
 # %%
-#Plotting the results for 50k experiments
+# #Plotting the results for 50k experiments
 
-arrivalPositionsChosenFairPA, a_50k_uniform = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50)
+# arrivalPositionsChosenFairPA, a_50k_uniform = runExperiment(algorithm="FairGeneralProphet", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50)
     
-arrivalPositionsChosenFairIID, b_50k_uniform = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50)
+# arrivalPositionsChosenFairIID, b_50k_uniform = runExperiment(algorithm="FairIIDProphet", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50)
     
-arrivalPositionsChosenSC, c_50k_uniform = runExperiment(algorithm="SC", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50)
+# arrivalPositionsChosenSC, c_50k_uniform = runExperiment(algorithm="SC", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50)
     
-arrivalPositionsChosenEHKS, d_50k_uniform = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50)
+# arrivalPositionsChosenEHKS, d_50k_uniform = runExperiment(algorithm="EHKS", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50)
 
-arrivalPositionsChosenCFHOV, e_50k_uniform = runExperiment(algorithm="CFHOV", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50)
+# arrivalPositionsChosenCFHOV, e_50k_uniform = runExperiment(algorithm="CFHOV", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50)
 
-arrivalPositionsChosenDP, f_50k_uniform = runExperiment(algorithm="DP", N_experimentReps=50000, 
-                                                distribution_type="uniform", n_candidates=50)
+# arrivalPositionsChosenDP, f_50k_uniform = runExperiment(algorithm="DP", N_experimentReps=50000, 
+#                                                 distribution_type="uniform", n_candidates=50)
 
-plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
-plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
-plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
-plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
-# plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
-plt.plot(range(0,50), arrivalPositionsChosenCFHOV, label="CFHOV")
-plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
-plt.title("50k experiments, discarding None results")
-plt.xlabel("Arrival position")
-plt.ylabel("Num Picked")
-plt.legend(loc="upper right")
-# plt.savefig("images/50kExperiments.png")
+# plt.plot(range(0,50), arrivalPositionsChosenFairPA, label="Fair PA")
+# plt.plot(range(0,50), arrivalPositionsChosenFairIID, label="Fair IID")
+# plt.plot(range(0,50), arrivalPositionsChosenSC, label="SC")
+# plt.plot(range(0,50), arrivalPositionsChosenEHKS, label="EHKS")
+# # plt.plot(range(0,50), arrivalPositionsChosenDP, label="DP")
+# plt.plot(range(0,50), arrivalPositionsChosenCFHOV, label="CFHOV")
+# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+# plt.title("50k experiments, discarding None results")
+# plt.xlabel("Arrival position")
+# plt.ylabel("Num Picked")
+# plt.legend(loc="upper right")
+# # plt.savefig("images/50kExperiments.png")
 
 # %% [markdown]
 # This led us to examining two approaches. One in which we increase the number of experiments to 100k, and one where we run 50k experiments and keep repeating each experiment untill we don't get a None. The first one has been done above, and seems to confirm the found results.
@@ -333,11 +333,11 @@ plt.legend(loc="upper right")
 #
 
 # %%
-print("Uniform case, for FairPA")
-print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(a_50k_uniform) / mean(e_50k_uniform) *100, "%")
+# print("Uniform case, for FairPA")
+# print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(a_50k_uniform) / mean(e_50k_uniform) *100, "%")
 
-print("\n Uniform case, for FairIID")
-print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b_50k_uniform) / mean(e_50k_uniform) * 100, "%")
+# print("\n Uniform case, for FairIID")
+# print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b_50k_uniform) / mean(e_50k_uniform) * 100, "%")
 
 
 
@@ -374,11 +374,17 @@ print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b_50k
 # save('data/EHKS_values.npy', EHKS_values)
 
 # %%
-# arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000, 
-#                                                 distribution_type="binomial", n_candidates=1000)
+arrivalPositionsChosenCFHOV, CFHOV_values = runExperiment(algorithm="CFHOV", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
 
-# save('data/DP_positions.npy', arrivalPositionsChosenDP)
-# save('data/DP_values.npy', DP_values)
+save('data/CFHOV_positions.npy', arrivalPositionsChosenCFHOV)
+save('data/CFHOV_values.npy', CFHOV_values)
+
+arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000, 
+                                                distribution_type="binomial", n_candidates=1000)
+
+save('data/DP_positions.npy', arrivalPositionsChosenDP)
+save('data/DP_values.npy', DP_values)
 
 # %%
 # plt.plot(range(0,1000), load('data/FairPA_positions.npy'), label="FairPA")
@@ -415,11 +421,17 @@ print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b_50k
 # save('data/EHKS_positions100k.npy', arrivalPositionsChosenEHKS)
 # save('data/EHKS_values100k.npy', EHKS_values)
 
-# arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000*2, 
-#                                                 distribution_type="binomial", n_candidates=1000)
+arrivalPositionsChosenCFHOV, CFHOV_values = runExperiment(algorithm="CFHOV", N_experimentReps=50000*2, 
+                                                distribution_type="binomial", n_candidates=1000)
 
-# save('data/DP_positions100k.npy', arrivalPositionsChosenDP)
-# save('data/DP_values100k.npy', DP_values)
+save('data/CFHOV_positions100k.npy', arrivalPositionsChosenCFHOV)
+save('data/CFHOV_values100k.npy', CFHOV_values)
+
+arrivalPositionsChosenDP, DP_values = runExperiment(algorithm="DP", N_experimentReps=50000*2, 
+                                                distribution_type="binomial", n_candidates=1000)
+
+save('data/DP_positions100k.npy', arrivalPositionsChosenDP)
+save('data/DP_values100k.npy', DP_values)
 
 
 # %% [markdown]
@@ -431,38 +443,32 @@ print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(b_50k
 # %%
 import pandas as pd
 
-def FairGeneralProphetExtended(q, V, distribution_type, parameter_value):
+def FairGeneralProphetExtended(q, V, distribution_type, epsilon):
     s = 0.0
     n = len(V)
     for i in range(0,n): #value < 1 reaches a drop!
-        p = (1- (q[i]/2)/(parameter_value-(s/2)))
+        p = (1- (q[i]/2)/(epsilon-(s/2)))
         if V[i] >= Finv(distribution_type, p):
             return i
         s += q[i]
 
-def FairIIDProphetExtended(V, distribution_type, parameter_value):
+def FairIIDProphetExtended(V, distribution_type, epsilon):
     n = len(V)
     for i in range(0, n):
-        p = 1 - (2/(3*n)) / (parameter_value - 2*(i-1)/(3*n))
+        p = 1 - (2/(3*n)) / (epsilon - 2*(i-1)/(3*n))
         if V[i] >= Finv(distribution_type, p):
                  return i
         
-def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_candidates, parameter_value):
+def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_candidates, epsilon):
     arrivalPositionsChosen, chosenValues, chosenValuesExcludeNone = [0]*n_candidates, [], []
     nones = 0
     for _ in tqdm(range(0, N_experimentReps)):
         q, Values = generateDistribution(distribution_type, n_candidates)
         
         if algorithm == "FairGeneralProphet":
-                result = FairGeneralProphetExtended(q, Values, distribution_type, parameter_value)
+                result = FairGeneralProphetExtended(q, Values, distribution_type, epsilon)
         elif algorithm == "FairIIDProphet":
-                result = FairIIDProphetExtended(Values, distribution_type, parameter_value)
-#         elif algorithm == "SC":
-#                 result = SC_algorithm(Values, distribution_type)
-#         elif algorithm =="EHKS":
-#                 result = EHKS_algorithm(Values, distribution_type)
-#         elif algorithm == "DP":
-#                 result = DP_algorithm(Values, distribution_type)
+                result = FairIIDProphetExtended(Values, distribution_type, epsilon)
         if result != None:
             arrivalPositionsChosen[result] += 1
             chosenValues.append(Values[result])
@@ -470,62 +476,96 @@ def runExperimentExtended(algorithm, N_experimentReps, distribution_type, n_cand
             
         if result == None: 
             chosenValues.append(0)
-            nones += 1
-            
+            nones += 1     
         
     noneRate = nones/N_experimentReps
         
     return noneRate, mean(chosenValues), mean(chosenValuesExcludeNone), arrivalPositionsChosen
 
+
 # %%
 #Fair general prophet
-df = pd.DataFrame(columns=['Parameter value', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
-for param in [1.2,1.0,0.5,0.3]:
+df = pd.DataFrame(columns=['epsilon', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
+for param in np.arange(0.3, 1.2, .25):
     nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairGeneralProphet", 
                                                                                  N_experimentReps=50000,
                                                                                  distribution_type="uniform", 
                                                                                  n_candidates=50, 
-                                                                                 parameter_value=param
+                                                                                 epsilon=param
                                                                                 )
     
     a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
     df = df.append(a_series, ignore_index=True)
-    
-#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
 
     plt.plot(range(0,50), chosen_positions, label= str("γ = " + str(param)))
-# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
-                mode="expand", borderaxespad=0, ncol=4)
+                mode="expand", borderaxespad=0, ncol=2)
 plt.savefig("images/extensionFairPA_uniform.png")
 dfi.export(df, 'images/extenstionFairPA_table_uniform.png')
 
+#Fair general prophet
+df = pd.DataFrame(columns=['epsilon', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
+for param in np.arange(0.3, 1.2, .25):
+    nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="binomial", 
+                                                                                 n_candidates=1000, 
+                                                                                 epsilon=param
+                                                                                )
+    
+    a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
+    df = df.append(a_series, ignore_index=True)
+
+    plt.plot(range(0,1000), chosen_positions, label= str("γ = " + str(param)))
+plt.xlabel("Arrival position")
+plt.ylabel("Num Picked")
+plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
+                mode="expand", borderaxespad=0, ncol=2)
+plt.savefig("images/extensionFairPA_binomial.png")
+dfi.export(df, 'images/extenstionFairPA_table_binomial.png')
+
 # %%
 #Fair IID prophet
-df = pd.DataFrame(columns=['Parameter value', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
-
-for param in [1.2,1.0,0.7,0.5]:
+df = pd.DataFrame(columns=['epsilon', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
+for param in np.arange(0.5, 1.5, .25):
     nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairIIDProphet", 
                                                                                  N_experimentReps=50000,
                                                                                  distribution_type="uniform", 
                                                                                  n_candidates=50, 
-                                                                                 parameter_value=param
+                                                                                 epsilon=param
                                                                                 )
     
     a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
     df = df.append(a_series, ignore_index=True)
-    
-#     df = df.append([[param,avg_include,avg_exclude]], ignore_index=True)
-
     plt.plot(range(0,50), chosen_positions, label= str("γ = " + str(param)))
-# plt.plot(range(0,50), range(0,4000,80), label="replicate CFHOV for scale")
+    
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
-                mode="expand", borderaxespad=0, ncol=4)
+                mode="expand", borderaxespad=0, ncol=2)
 plt.savefig("images/extensionFairIID_table_uniform.png")
 dfi.export(df, "images/extenstionFairIID_table_uniform.png")
+
+df = pd.DataFrame(columns=['epsilon', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
+for param in np.arange(0.5, 1.5, .25):
+    nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairIIDProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="binomial", 
+                                                                                 n_candidates=1000, 
+                                                                                 epsilon=param
+                                                                                )
+    
+    a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
+    df = df.append(a_series, ignore_index=True)
+    plt.plot(range(0,1000), chosen_positions, label= str("γ = " + str(param)))
+    
+plt.xlabel("Arrival position")
+plt.ylabel("Num Picked")
+plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
+                mode="expand", borderaxespad=0, ncol=2)
+plt.savefig("images/extensionFairIID_table_binomial.png")
+dfi.export(df, "images/extenstionFairIID_table_binomial.png")
 
 # %%
