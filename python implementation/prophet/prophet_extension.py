@@ -146,7 +146,7 @@ for param in np.arange(0.5, 1.5, .25):
     
     a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
     df = df.append(a_series, ignore_index=True)
-    plt.plot(range(0,100), chosen_positions, label= str("γ = " + str(param)))
+    plt.plot(range(0,500), chosen_positions, label= str("γ = " + str(param)))
     
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")

@@ -1,9 +1,8 @@
 # Introduction
-The files in the C++ folder are authored by authors of the original paper
-(Correa et al., 2021). The python folder includes our Python based implementation.
+The files in the C++ folder are authored by authors of the original paper (Correa et al., 2021). The python folder includes our Python based implementation.
 
 # Dependencies
-In order to run use either: 'pip install' or use the supplied fact_ai.yml environment file
+In order to run use either: 'pip install .....' or use the supplied fact_ai.yml environment file
 
 # Run
 To run original c++ representation:
