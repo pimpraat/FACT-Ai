@@ -155,48 +155,55 @@ plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
 # plt.savefig("images/extensionFairIID_table_binomial.png")
 # dfi.export(df, "images/extenstionFairIID_table_binomial.png")
 
-# %%
-## Running the significance test for the extension, uniform distribution
+# %% [markdown]
+# ## Running the significance test for the extension, uniform distribution
+
+# %% [markdown]
+# _Output is two lists of 10x the avgInclude for the two groups. Group 1 is PaperValue, Group 2 is ourExtensionValue, for both FairProphet and FairIID._
 
 # %%
-_Output is two lists of 10x the v_
+FairProphetPA_PaperValue, FairProphetPA_ExtensionValue = [], []
+FairProphetIID_PaperValue, FairProphetIID_ExtensionValue = [], []
 
-# %%
-_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
-                                                                                 N_experimentReps=50000,
-                                                                                 distribution_type="uniform", 
-                                                                                 n_candidates=50, 
-                                                                                 epsilon=.3
-                                                                                )
-print(avg_include)
+FairProphetPA_PaperParameter = 1
+FairProphetIID_PaperParameter = 1
+FairProphetPA_ExtensionParameter = .55
+FairProphetIID_ExtensionParameter = .75
 
-_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
-                                                                                 N_experimentReps=50000,
-                                                                                 distribution_type="uniform", 
-                                                                                 n_candidates=50, 
-                                                                                 epsilon=.3
-                                                                                )
-print(avg_include)
-_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
-                                                                                 N_experimentReps=50000,
-                                                                                 distribution_type="uniform", 
-                                                                                 n_candidates=50, 
-                                                                                 epsilon=.3
-                                                                                )
-print(avg_include)
-_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
-                                                                                 N_experimentReps=50000,
-                                                                                 distribution_type="uniform", 
-                                                                                 n_candidates=50, 
-                                                                                 epsilon=.3
-                                                                                )
-print(avg_include)
-_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
-                                                                                 N_experimentReps=50000,
-                                                                                 distribution_type="uniform", 
-                                                                                 n_candidates=50, 
-                                                                                 epsilon=.3
-                                                                                )
-print(avg_include)
+for i in range(0, 10):
+    _, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                     N_experimentReps=50000,
+                                                                                     distribution_type="uniform", 
+                                                                                     n_candidates=50, 
+                                                                                     epsilon=FairProphetPA_PaperParameter
+                                                                                    )
+    FairProphetPA_PaperValue.append(avg_include)
+    
+    _, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                     N_experimentReps=50000,
+                                                                                     distribution_type="uniform", 
+                                                                                     n_candidates=50, 
+                                                                                     epsilon=FairProphetPA_ExtensionParameter
+                                                                                    )
+    FairProphetPA_ExtensionValue.append(avg_include)
+    
+for i in range(0, 10):
+    _, avg_include, _, _ = runExperimentExtended(algorithm="FairIIDProphet", 
+                                                                                     N_experimentReps=50000,
+                                                                                     distribution_type="uniform", 
+                                                                                     n_candidates=50, 
+                                                                                     epsilon=FairProphetIID_PaperParameter
+                                                                                    )
+    FairProphetIID_PaperValue.append(avg_include)
+    
+    _, avg_include, _, _ = runExperimentExtended(algorithm="FairIIDProphet", 
+                                                                                     N_experimentReps=50000,
+                                                                                     distribution_type="uniform", 
+                                                                                     n_candidates=50, 
+                                                                                     epsilon=FairProphetIID_ExtensionParameter
+                                                                                    )
+    FairProphetIID_ExtensionValue.append(avg_include)
+    
+
 
 # %%
