@@ -16,7 +16,7 @@
 # # Prophet results
 
 # %% [markdown]
-# _This notebook contains all the obtained results. For their imlplementation please refer to the prophet notebook itself. Furthermore please make sure to install ipynb by running:_ `pip install ipynb`
+# _This notebook contains all the obtained results. For their imlplementation please refer to the prophet notebook itself. Furthermore please make sure to install ipynb by running:_ `pip install ipynb dataframe_image tqdm`
 #
 
 # %%
@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from statistics import mean
 from numpy import load, save
 import dataframe_image as dfi
+import matplotlib.pyplot as plt
 
 # %%
 #Plotting the results for 50k experiments
@@ -86,6 +87,9 @@ arrivalPositionsChosenSC, c_100k_uniform = runExperiment(algorithm="SC", N_exper
                                                 distribution_type="uniform", n_candidates=50)
     
 arrivalPositionsChosenEHKS, d_100k_uniform = runExperiment(algorithm="EHKS", N_experimentReps=50000*2, 
+                                                distribution_type="uniform", n_candidates=50)
+
+arrivalPositionsChosenCFHOV, e_100k_uniform = runExperiment(algorithm="CFHOV", N_experimentReps=50000*2, 
                                                 distribution_type="uniform", n_candidates=50)
 
 arrivalPositionsChosenDP, e_100k_uniform = runExperiment(algorithm="DP", N_experimentReps=50000*2, 
