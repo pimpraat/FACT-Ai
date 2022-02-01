@@ -156,3 +156,47 @@ plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
 # dfi.export(df, "images/extenstionFairIID_table_binomial.png")
 
 # %%
+## Running the significance test for the extension, uniform distribution
+
+# %%
+_Output is two lists of 10x the v_
+
+# %%
+_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="uniform", 
+                                                                                 n_candidates=50, 
+                                                                                 epsilon=.3
+                                                                                )
+print(avg_include)
+
+_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="uniform", 
+                                                                                 n_candidates=50, 
+                                                                                 epsilon=.3
+                                                                                )
+print(avg_include)
+_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="uniform", 
+                                                                                 n_candidates=50, 
+                                                                                 epsilon=.3
+                                                                                )
+print(avg_include)
+_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="uniform", 
+                                                                                 n_candidates=50, 
+                                                                                 epsilon=.3
+                                                                                )
+print(avg_include)
+_, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+                                                                                 N_experimentReps=50000,
+                                                                                 distribution_type="uniform", 
+                                                                                 n_candidates=50, 
+                                                                                 epsilon=.3
+                                                                                )
+print(avg_include)
+
+# %%
