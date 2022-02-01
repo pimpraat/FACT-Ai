@@ -90,20 +90,23 @@ plt.savefig("images/extensionFairPA_uniform.png")
 dfi.export(df, 'images/extenstionFairPA_table_uniform.png')
 
 # %%
+df
+
+# %%
 #Fair general prophet Binomial distribution
 df = pd.DataFrame(columns=['epsilon', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
 for param in np.arange(0.3, 1.2, .25):
     nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairGeneralProphet", 
-                                                                                 N_experimentReps=5000,
+                                                                                 N_experimentReps=50000,
                                                                                  distribution_type="binomial", 
-                                                                                 n_candidates=500, 
+                                                                                 n_candidates=1000, 
                                                                                  epsilon=param
                                                                                 )
     
     a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
     df = df.append(a_series, ignore_index=True)
 
-    plt.plot(range(0,100), chosen_positions, label= str("γ = " + str(param)))
+    plt.plot(range(0,1000), chosen_positions, label= str("γ = " + str(param)))
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
@@ -138,15 +141,15 @@ dfi.export(df, "images/extenstionFairIID_table_uniform.png")
 df = pd.DataFrame(columns=['epsilon', 'None rate', "Mean value (None=0)", "Mean value (excluding None)"])
 for param in np.arange(0.5, 1.5, .25):
     nonerate, avg_include, avg_exclude, chosen_positions = runExperimentExtended(algorithm="FairIIDProphet", 
-                                                                                 N_experimentReps=5000,
+                                                                                 N_experimentReps=50000,
                                                                                  distribution_type="binomial", 
-                                                                                 n_candidates=500, 
+                                                                                 n_candidates=1000, 
                                                                                  epsilon=param
                                                                                 )
     
     a_series = pd.Series([param,nonerate,avg_include,avg_exclude], index = df.columns)
     df = df.append(a_series, ignore_index=True)
-    plt.plot(range(0,500), chosen_positions, label= str("γ = " + str(param)))
+    plt.plot(range(0,1000), chosen_positions, label= str("γ = " + str(param)))
     
 plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
@@ -186,6 +189,7 @@ for i in range(0, 10):
                                                                                      epsilon=FairProphetPA_ExtensionParameter
                                                                                     )
     FairProphetPA_ExtensionValue.append(avg_include)
+    
     
 for i in range(0, 10):
     _, avg_include, _, _ = runExperimentExtended(algorithm="FairIIDProphet", 

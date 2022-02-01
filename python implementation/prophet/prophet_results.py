@@ -93,8 +93,8 @@ arrivalPositionsChosenDP_100k_binomial, DP_100k_binomial = load('data/DP_positio
 # ## Generating plots for the prophet problem
 
 # %%
-plt.subplots_adjust(bottom=0.25)
 plt.rcParams["figure.figsize"] = (8,3)
+plt.subplots_adjust(bottom=0.25)
 plt.rcParams.update({'font.size': 14})
 plt.plot(range(0,50), arrivalPositionsChosenFairPA_50k_uniform, label="Fair PA")
 plt.plot(range(0,50), arrivalPositionsChosenFairIID_50k_uniform, label="Fair IID")
@@ -111,8 +111,8 @@ plt.legend(loc="upper left", ncol=5)
 plt.savefig("images/uniform_distribution/50kExperiments_uniform.png")
 
 # %%
-plt.subplots_adjust(bottom=0.25)
 plt.rcParams["figure.figsize"] = (8,3)
+plt.subplots_adjust(bottom=0.25)
 plt.rcParams.update({'font.size': 14})
 plt.plot(range(0,50), arrivalPositionsChosenFairPA_100k_uniform, label="Fair PA")
 plt.plot(range(0,50), arrivalPositionsChosenFairIID_100k_uniform, label="Fair IID")
@@ -128,8 +128,8 @@ plt.legend(loc="upper left", ncol=5)
 plt.savefig("images/uniform_distribution/100kExperiments_uniform.png")
 
 # %%
-plt.subplots_adjust(bottom=0.25)
 plt.rcParams["figure.figsize"] = (8,3)
+plt.subplots_adjust(bottom=0.25)
 plt.rcParams.update({'font.size': 14})
 
 plt.plot(range(0,1000), load('data/FairPA_positions.npy'), label="FairPA")
@@ -147,8 +147,8 @@ plt.legend(loc="upper left", ncol=5)
 plt.savefig("images/binomial_distribution/50kExperiments_binomial.png")
 
 # %%
-plt.subplots_adjust(bottom=0.25)
 plt.rcParams["figure.figsize"] = (8,3)
+plt.subplots_adjust(bottom=0.25)
 plt.rcParams.update({'font.size': 14})
 plt.plot(range(0,1000), load('data/FairPA_positions100k.npy'), label="FairPA")
 plt.plot(range(0,1000), load('data/FairIID_positions100k.npy'), label="Fair IID")
