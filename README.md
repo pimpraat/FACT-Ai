@@ -1,12 +1,21 @@
 # Introduction
-The files in the C++ folder are authored by authors of the original paper (Correa et al., 2021). The python folder includes our Python based implementation.
+The code for this project firstly divided in two seperate directories, '_c++_' which contains the runnable code (fixed by us), based on the code by authors of the original paper (Correa et al., 2021). The '_python implementation_' folder includes our own Python based implementation in two seperate directories.
 
-# Dependencies
-In order to run use either: 'pip install .....' or use the supplied fact_ai.yml environment file
+## Dependencies
+In order to run all files use either: 'pip install ipynb tqdm dataframe_image pickle typing' to install the less common libraries or use the supplied fact_ai.yml environment file to install all required dependencies in one go. This will make sure all required dependencies for all steps of this reproducibility study are installed (the actual algorithms, generating data, and analysis).
 
-# Run
-To run original c++ representation:
-g++ -std=c++11 -o main main.cc (not working yet)
+# Running the code 
+
+To run the notebooks containing the results mentioned in the paper, run the following notebooks:
+* in 'python implementation/secretary/Secretary_Evalulation.ipynb' jupyter notebook in order to run the results for all secretary experiments used in the paper.
+* in 'python implementation/prophet/prophet_results.ipynb' jupyter notebook in order to run general results for the prophet experiments used in the paper.
+* in 'python implementation/prophet/prophet_results_extension.ipynb' jupyter notebook in order to run  results for the prophet extension used in the paper.
+
+_All of these notebooks contain only the neccesary calls to produce the resuls. Further implementations and notebooks to run the experiments can be found in the folders 'secretary' and 'prophet' respectively_.
+
+
+# Running the C++ code
+To run original c++ representation, run the main.cc file after uncommenting the wanted experiments in the main method. This will print the results in the command line.
 
 # Set up
 To allow for version control of jupyter notebooks, please run:

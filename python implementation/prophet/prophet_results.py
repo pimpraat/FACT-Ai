@@ -231,15 +231,15 @@ df
 print("Original: In conclusion, for both settings, both our algorithms Algorithm 2 and Algorithm 3 provide perfect fairness, while giving 66.71% and 88.01% (for the uniform case), and 58.12% and 75.82% (for the binomial case), of the value of the optimal, but unfair, online algorithm.")
 
 print("Uniform case, for FairPA")
-print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(FairPA_100k_uniform) / mean(CFHOV_100k_uniform) *100, "%")
+print("Assuming DP as the 'optimal, but unfair, online algorithm' :", sum(FairPA_100k_uniform) / sum(CFHOV_100k_uniform) *100, "%")
 
 print("\n Uniform case, for FairIID")
-print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(FairIID_100k_uniform) / mean(CFHOV_100k_uniform) * 100, "%")
+print("Assuming DP as the 'optimal, but unfair, online algorithm' :", sum(FairIID_100k_uniform) / sum(CFHOV_100k_uniform) * 100, "%")
 
 print("Binomial case, for FairPA")
-print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(FairPA_100k_binomial) / mean(DP_100k_binomial) *100, "%")
+print("Assuming DP as the 'optimal, but unfair, online algorithm' :", sum(FairPA_100k_binomial) / sum(DP_100k_binomial) *100, "%")
 
 print("\n Binomial case, for FairIID")
-print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(FairIID_100k_binomial) / mean(DP_100k_binomial) * 100, "%")
+print("Assuming DP as the 'optimal, but unfair, online algorithm' :", sum(FairIID_100k_binomial) / sum(DP_100k_binomial) * 100, "%")
 
 # %%
