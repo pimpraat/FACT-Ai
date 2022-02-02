@@ -241,3 +241,5 @@ print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(FairP
 
 print("\n Binomial case, for FairIID")
 print("Assuming DP as the 'optimal, but unfair, online algorithm' :", mean(FairIID_100k_binomial) / mean(DP_100k_binomial) * 100, "%")
+
+# %%
