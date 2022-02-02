@@ -186,46 +186,59 @@ dfi.export(df, "images/extensionFairIID_table_binomial.png")
 FairProphetPA_PaperValue, FairProphetPA_ExtensionValue = [], []
 FairProphetIID_PaperValue, FairProphetIID_ExtensionValue = [], []
 
+FairProphetPA_PaperValue_exclude, FairProphetPA_ExtensionValue_exclude = [], []
+FairProphetIID_PaperValue_exclude, FairProphetIID_ExtensionValue_exclude = [], []
+
 FairProphetPA_PaperParameter = 1
 FairProphetIID_PaperParameter = 1
-FairProphetPA_ExtensionParameter = .55
-FairProphetIID_ExtensionParameter = .75
+FairProphetPA_ExtensionParameter = .5
+FairProphetIID_ExtensionParameter = .7
 
-for i in range(0, 5):
-    _, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+for i in range(0, 10):
+    _, avg_include, avg_exclude, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
                                                                                      N_experimentReps=50000,
                                                                                      distribution_type="uniform", 
                                                                                      n_candidates=50, 
                                                                                      epsilon=FairProphetPA_PaperParameter
                                                                                     )
     FairProphetPA_PaperValue.append(avg_include)
+    FairProphetPA_PaperValue_exclude.append(avg_exclude)
     
-    _, avg_include, _, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
+    _, avg_include, avg_exclude, _ = runExperimentExtended(algorithm="FairGeneralProphet", 
                                                                                      N_experimentReps=50000,
                                                                                      distribution_type="uniform", 
                                                                                      n_candidates=50, 
                                                                                      epsilon=FairProphetPA_ExtensionParameter
                                                                                     )
     FairProphetPA_ExtensionValue.append(avg_include)
+    FairProphetPA_ExtensionValue_exclude.append(avg_exclude)
     
     
-for i in range(0, 5):
-    _, avg_include, _, _ = runExperimentExtended(algorithm="FairIIDProphet", 
+for i in range(0, 10):
+    _, avg_include, avg_exclude, _ = runExperimentExtended(algorithm="FairIIDProphet", 
                                                                                      N_experimentReps=50000,
                                                                                      distribution_type="uniform", 
                                                                                      n_candidates=50, 
                                                                                      epsilon=FairProphetIID_PaperParameter
                                                                                     )
     FairProphetIID_PaperValue.append(avg_include)
+    FairProphetIID_PaperValue_exclude.append(avg_exclude)
     
-    _, avg_include, _, _ = runExperimentExtended(algorithm="FairIIDProphet", 
+    _, avg_include, avg_exclude, _ = runExperimentExtended(algorithm="FairIIDProphet", 
                                                                                      N_experimentReps=50000,
                                                                                      distribution_type="uniform", 
                                                                                      n_candidates=50, 
                                                                                      epsilon=FairProphetIID_ExtensionParameter
                                                                                     )
     FairProphetIID_ExtensionValue.append(avg_include)
+    FairProphetIID_ExtensionValue_exclude.append(avg_exclude)
     
+    
+# FairProphetPA_PaperValue, FairProphetPA_ExtensionValue = [], []
+# FairProphetIID_PaperValue, FairProphetIID_ExtensionValue = [], []
+
+# FairProphetPA_PaperValue_exclude, FairProphetPA_ExtensionValue_exclude = [], []
+# FairProphetIID_PaperValue_exclude, FairProphetIID_ExtensionValue_exclude = [], []
 
 
 # %%
@@ -235,3 +248,5 @@ print(ttest_ind(FairProphetIID_PaperValue, FairProphetIID_ExtensionValue))
 # %%
 print(ttest_ind(FairProphetPA_PaperValue_exclude, FairProphetPA_ExtensionValue_exclude))
 print(ttest_ind(FairProphetIID_PaperValue_exclude, FairProphetIID_ExtensionValue_exclude))
+
+# %%
