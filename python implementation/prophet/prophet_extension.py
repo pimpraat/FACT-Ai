@@ -155,8 +155,8 @@ plt.xlabel("Arrival position")
 plt.ylabel("Num Picked")
 plt.legend(bbox_to_anchor=(0,1.02,1,0.2), loc="lower left",
                 mode="expand", borderaxespad=0, ncol=2)
-# plt.savefig("images/extensionFairIID_table_binomial.png")
-# dfi.export(df, "images/extenstionFairIID_table_binomial.png")
+plt.savefig("images/extensionFairIID_table_binomial.png")
+dfi.export(df, "images/extenstionFairIID_table_binomial.png")
 
 # %% [markdown]
 # ## Running the significance test for the extension, uniform distribution
