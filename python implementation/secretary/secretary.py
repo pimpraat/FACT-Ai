@@ -1,8 +1,9 @@
+import typing
 import numpy as np
 from data import SecretaryInstance
 
 
-def secretary_algorithm(all_candidates, max_colors):
+def secretary_algorithm(all_candidates, max_colors) -> SecretaryInstance:
     """This method runs the first baseline: the Secretary Algorithm
 
     Args:
@@ -24,7 +25,7 @@ def secretary_algorithm(all_candidates, max_colors):
 
     return best_candidate
 
-def one_color_secretary_algorithm(candidates, max_colors, *args):
+def one_color_secretary_algorithm(candidates, max_colors, *args) -> SecretaryInstance:
     """This method runs the second baseline: the One Color Secretary Algorithm
 
     Args:
@@ -56,7 +57,7 @@ def one_color_secretary_algorithm(candidates, max_colors, *args):
 
     return best_candidate
 
-def multiple_color_secretary_algorithm(candidates, max_colors, *args):
+def multiple_color_secretary_algorithm(candidates, max_colors, *args) -> SecretaryInstance:
     """This method runs the fair opt algorithm: the Multiple Color Secretary Algorithm
 
     Args:
@@ -83,7 +84,7 @@ def multiple_color_secretary_algorithm(candidates, max_colors, *args):
 
     return SecretaryInstance(-1, -1, None)
 
-def multiple_color_thresholds(p):
+def multiple_color_thresholds(p) -> typing.List[float]:
     """Helper function for the fair opt algorithm. Receives probabilities and converts them to threshold
 
     Args:
@@ -93,7 +94,7 @@ def multiple_color_thresholds(p):
         t ([float]): A percentage threshold to be used in the main algorithm
     """
     
-    t = [0] * len(p)
+    t = [0.0] * len(p)
     k = len(p)
     
     t[k-1] = np.power((1 - (k - 1) * p[k - 1]), (1 / (k - 1)))
