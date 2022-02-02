@@ -11,7 +11,7 @@ To run the notebooks containing the results mentioned in the paper, run the foll
 * in 'python implementation/prophet/prophet_results.ipynb' jupyter notebook in order to run general results for the prophet experiments used in the paper.
 * in 'python implementation/prophet/prophet_results_extension.ipynb' jupyter notebook in order to run  results for the prophet extension used in the paper.
 
-_All of these notebooks contain only the neccesary calls to produce the resuls. Further implementations and notebooks to run the experiments can be found in the folders 'secretary' and 'prophet' respectively_.
+_All of these notebooks contain only the neccesary calls to produce the results. Further implementations and notebooks to run the experiments can be found in the folders 'secretary' and 'prophet' respectively_.
 
 
 # Running the C++ code
