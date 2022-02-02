@@ -1,11 +1,12 @@
 import random
 import pickle
+import typing
 import numpy as np
 from data import get_synthetic_data, get_bank_data, get_pokec_data
 from secretary import secretary_algorithm, one_color_secretary_algorithm, multiple_color_secretary_algorithm, multiple_color_thresholds
 
 
-def secretary_experiment(candidates, *args):
+def secretary_experiment(candidates, *args) -> typing.Tuple[typing.Tuple, typing.Tuple, typing.Tuple]:
     """Runs three secretary algorithms on the given data: Two baselines, namely the Secretary Algorithm and the
     Single Color Secretary Algorithm; One fair optim algorithm names Multiple Color Secretary Algorithm
 
@@ -35,7 +36,7 @@ def secretary_experiment(candidates, *args):
     for i in range(n_iterations):
         
         if i % 1000 == 0:
-            print(i % 1000, "K")
+            print(i)
 
         random.shuffle(candidates)
         result_SA = secretary_algorithm(candidates, max_colors)
@@ -49,7 +50,7 @@ def secretary_experiment(candidates, *args):
 
     return results_SA, results_SCSA, results_MCSA
 
-def synthetic_experiment():
+def synthetic_experiment() -> typing.Tuple:
     """Sets parameters and runs the synthetic data experiment"""
     
     colors = ['red', 'green', 'blue', 'yellow']
@@ -61,7 +62,7 @@ def synthetic_experiment():
 
     return results
 
-def unbalanced_synthetic_experiment():
+def unbalanced_synthetic_experiment() -> typing.Tuple:
     """Sets parameters and runs the unbalanced synthetic data experiment"""
 
     colors = ['red', 'green', 'blue', 'yellow']
@@ -73,7 +74,7 @@ def unbalanced_synthetic_experiment():
     
     return results
     
-def bank_experiment(path):
+def bank_experiment(path) -> typing.Tuple[typing.Tuple, typing.List[int]]:
     """Sets parameters and runs the feedback maximization experiment
 
     Args:
@@ -90,7 +91,7 @@ def bank_experiment(path):
     
     return results, n
 
-def pokec_experiment(path):
+def pokec_experiment(path) -> typing.Tuple[typing.Tuple, typing.List[int]]:
     """Sets parameters and runs the influence maximization experiment
 
     Args:
@@ -127,8 +128,8 @@ def run_experiments(path):
     
     results = synthetic_experiment()
     results2 = unbalanced_synthetic_experiment()
-    results3, n_bank = bank_experiment(path + 'data/bank_raw.csv')
-    results4, n_pokec = pokec_experiment(path)
+    # results3, n_bank = bank_experiment(path + 'data/bank_raw.csv')
+    # results4, n_pokec = pokec_experiment(path)
     
     with open(path + 'results/results_synthetic1.pickle', 'wb') as f:
         pickle.dump(results, f)
@@ -136,14 +137,14 @@ def run_experiments(path):
     with open(path + 'results/results_synthetic2.pickle', 'wb') as f:
         pickle.dump(results2, f)
         
-    with open(path + 'results/results_bank.pickle', 'wb') as f:
-        pickle.dump(results3, f)
+    # with open(path + 'results/results_bank.pickle', 'wb') as f:
+    #     pickle.dump(results3, f)
         
-    with open(path + 'results/results_bank_args.pickle', 'wb') as f:
-        pickle.dump(n_bank, f)
+    # with open(path + 'results/results_bank_args.pickle', 'wb') as f:
+    #     pickle.dump(n_bank, f)
         
-    with open(path + 'results/results_pokec.pickle', 'wb') as f:
-        pickle.dump(results4, f)
+    # with open(path + 'results/results_pokec.pickle', 'wb') as f:
+    #     pickle.dump(results4, f)
         
-    with open(path + 'results/results_pokec_args.pickle', 'wb') as f:
-        pickle.dump(n_pokec, f)
+    # with open(path + 'results/results_pokec_args.pickle', 'wb') as f:
+    #     pickle.dump(n_pokec, f)

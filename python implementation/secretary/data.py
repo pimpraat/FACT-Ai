@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import typing
 
 
 class SecretaryInstance:
@@ -17,7 +18,7 @@ class SecretaryInstance:
         self.p = p
         self.ismax = False
 
-def get_synthetic_data(*args):
+def get_synthetic_data(*args) -> typing.List[SecretaryInstance]:
     """This method receives necessary arguments (list of colors, probabilities and size of groups)
     and returns a list of candidates
 
@@ -36,7 +37,7 @@ def get_synthetic_data(*args):
 
     return synthetic_data
 
-def get_bank_data(path, colors, probabilities):
+def get_bank_data(path, colors, probabilities) -> typing.Tuple[typing.List[SecretaryInstance], typing.List[int]]:
     """This method constructs the bank data.
 
     Args:
@@ -74,7 +75,7 @@ def get_bank_data(path, colors, probabilities):
     
     return synthetic_data, n
 
-def get_pokec_measurements(pokec_data_split):
+def get_pokec_measurements(pokec_data_split) -> typing.Tuple[typing.List[int], typing.List[int], typing.List[int]]:
     """This method receives unprocessed data and extracts the needed features
 
     Args:
@@ -110,7 +111,7 @@ def get_pokec_measurements(pokec_data_split):
             
     return height, weight, user_id
 
-def get_pokec_data(path, path_relationships, colors, probabilities):
+def get_pokec_data(path, path_relationships, colors, probabilities) -> typing.Tuple[typing.List[SecretaryInstance], typing.List[int]]:
     """This function constructs the pokec data
 
     Args:
