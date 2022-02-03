@@ -168,24 +168,6 @@ plt.savefig("images/binomial_distribution/100kExperiments_binomial.png")
 # # Analysis of the average values of the chosen candidates
 
 # %%
-print("Original : The average value of the chosen candidate for our Algorithm 2 (Fair PA), our Algorithm 3 (Fair IID), SC, EHKS, CFHOV, and DP for the uniform distribution is 0.501, 0.661, 0.499, 0.631, 0.752, 0.751, while for the binomial distribution it is 298.34, 389.24, 277.63, 363.97, 430.08, 513.34, respectively.")
-print("Uniform distribution (original, 50k, 100k):")
-print("FairPA: 0.501, ", round(mean(FairPA_50k_uniform),3), " , ", round(mean(FairPA_100k_uniform),3))
-print("FairIID: 0.661, ", round(mean(FairIID_50k_uniform),3), " , ", round(mean(FairIID_100k_uniform),3))
-print("SC: 0.499, ", round(mean(SC_50k_uniform),3), " , ", round(mean(SC_100k_uniform),3))
-print("EHKS: 0.631, ", round(mean(EHKS_50k_uniform),3), " , ", round(mean(EHKS_100k_uniform),3))
-print("CFHOV: 0.752, ", round(mean(CFHOV_50k_uniform),3), " , ", round(mean(CFHOV_100k_uniform),3))
-print("DP: 0.751, ", round(mean(DP_50k_uniform),3), " , ", round(mean(DP_100k_uniform),3))
-
-print("Binomial distribution:")
-print("FairPA: 298.34, ", round(mean(FairPA_50k_binomial),3), " , ", round(mean(FairPA_100k_binomial),3))
-print("FairIID: 389.24, ", round(mean(FairIID_50k_binomial),3), " , ", round(mean(FairIID_100k_binomial),3))
-print("SC: 277.63, ", round(mean(SC_50k_binomial),3), " , ", round(mean(SC_100k_binomial),3))
-print("EHKS: 363.97, ", round(mean(EHKS_50k_binomial),3), " , ", round(mean(EHKS_100k_binomial),3))
-print("CFHOV: 430.08, ", round(mean(CFHOV_50k_binomial),3), " , ", round(mean(CFHOV_100k_binomial),3))
-print("DP: 513.34, ", round(mean(DP_50k_binomial),3), " , ", round(mean(DP_100k_binomial),3))
-
-# %%
 print("Uniform distribution:")
 df = pd.DataFrame(columns=['Algorithm', 'Reported in the paper', "Reproduced 50k experiments", "Reproduced 100k experiments"])
 
@@ -228,7 +210,7 @@ df
 # # Percentage value of the optimal, but unfair, online algorithm
 
 # %%
-print("Original: In conclusion, for both settings, both our algorithms Algorithm 2 and Algorithm 3 provide perfect fairness, while giving 66.71% and 88.01% (for the uniform case), and 58.12% and 75.82% (for the binomial case), of the value of the optimal, but unfair, online algorithm.")
+print("Original: In conclusion, for both settings, both our algorithms Algorithm 2 and Algorithm 3 provide perfect fairness, while giving 66.71% and 88.01% (for the uniform case), and 58.12% and 75.82% (for the binomial case), of the value of the optimal, but unfair, online algorithm. \n")
 
 print("Uniform case, for FairPA")
 print("Assuming DP as the 'optimal, but unfair, online algorithm' :", sum(FairPA_100k_uniform) / sum(CFHOV_100k_uniform) *100, "%")

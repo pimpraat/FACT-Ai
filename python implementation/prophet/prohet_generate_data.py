@@ -18,7 +18,7 @@
 # %% [markdown]
 # _This notebook has been used to generate the data-files for all binomial distribution experiments. We save them because creating them on the fly (in for example the prophet_results notebook) takes too long._
 #
-# _Please comment the lowest block out the run the whole generation script. Please keep in mind that this can take > 20 hours_
+# _Please comment the lowest two blocks out to run the whole generation script. Please keep in mind that this can take > 20 hours_
 
 # %%
 from ipynb.fs.defs.prophet import generateDistribution, Finv
