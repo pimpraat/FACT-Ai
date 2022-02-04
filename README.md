@@ -1,5 +1,5 @@
 # Introduction
-The code for this project firstly divided in two seperate directories, '_c++_' which contains the runnable code (fixed by us), based on the code by the authors of the original paper (Correa et al., 2021). The '_python implementation_' folder includes our own Python based implementation in two seperate directories.
+The '_python implementation_' folder includes our own Python based implementation in two seperate directories: one for the secretary and one for the prophet implementation.
 
 ## Dependencies
 In order to run all files use either: 'pip install ipynb tqdm dataframe_image pickle typing' to install the less common libraries or use the supplied fact_ai.yml environment file to install all required dependencies in one go. This will make sure all required dependencies for all steps of this reproducibility study are installed (the actual algorithms, generating data, and analysis).
