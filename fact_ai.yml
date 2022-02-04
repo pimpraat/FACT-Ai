@@ -14,3 +14,6 @@ dependencies:
     - pillow==8.0.1
     - scipy
     - dataframe_image
+    - ipynb
+    - pickle
+    - typing
