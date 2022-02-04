@@ -91,25 +91,22 @@ def bank_experiment(path) -> typing.Tuple[typing.Tuple, typing.List[int]]:
     
     return results, n
 
-def pokec_experiment(path) -> typing.Tuple[typing.Tuple, typing.List[int]]:
+def pokec_experiment(path_profiles, path_followers) -> typing.Tuple[typing.Tuple, typing.List[int]]:
     """Sets parameters and runs the influence maximization experiment
 
     Args:
-        path (string): Directory for reading data and writing results
+        path_profiles (string): Directory for reading the profiles data
+        path_followers (string): Directory for reading the followers data
     """
 
-    colors = ["Under", "Normal", "Over", "Obese 1", "Obese 2"]
+    colors = ["Under", "Normal", "Over", "Obese1", "Obese2"]
     
     probabilities = [0.2, 0.2, 0.2, 0.2, 0.2]
     n = []
 
-    # pokec_data, n = get_pokec_data(path + 'soc-pokec-profiles.txt', path + 'soc-pokec-relationships.txt', colors, probabilities)
-    
-    # with open(path + 'data/pokec_dataset.pickle', 'wb') as f:
-    #     pickle.dump(pokec_data, f)
-        
+    # pokec_data, n = get_pokec_data(path_profiles, path_followers, colors, probabilities)
 
-    with open(path + 'data/pokec_dataset.pickle', 'rb') as f:
+    with open('data/pokec_dataset.pickle', 'rb') as f:
         pokec_data = pickle.load(f)
 
     for i in range(len(colors)):
@@ -119,7 +116,7 @@ def pokec_experiment(path) -> typing.Tuple[typing.Tuple, typing.List[int]]:
     
     return results, n
 
-def run_experiments(path):
+def run_experiments():
     """Runs all four experiments for the Secretary Problem
 
     Args:
@@ -128,23 +125,23 @@ def run_experiments(path):
     
     results = synthetic_experiment()
     results2 = unbalanced_synthetic_experiment()
-    # results3, n_bank = bank_experiment(path + 'data/bank_raw.csv')
-    # results4, n_pokec = pokec_experiment(path)
+    # results3, n_bank = bank_experiment('data/bank_raw.csv')
+    # results4, n_pokec = pokec_experiment('data/soc-pokec-profiles.txt', 'data/soc-pokec-relationships.txt')
     
-    with open(path + 'results/results_synthetic1.pickle', 'wb') as f:
+    with open('results/results_synthetic1.pickle', 'wb') as f:
         pickle.dump(results, f)
         
-    with open(path + 'results/results_synthetic2.pickle', 'wb') as f:
+    with open('results/results_synthetic2.pickle', 'wb') as f:
         pickle.dump(results2, f)
         
-    # with open(path + 'results/results_bank.pickle', 'wb') as f:
+    # with open('results/results_bank.pickle', 'wb') as f:
     #     pickle.dump(results3, f)
         
-    # with open(path + 'results/results_bank_args.pickle', 'wb') as f:
+    # with open('results/results_bank_args.pickle', 'wb') as f:
     #     pickle.dump(n_bank, f)
         
-    # with open(path + 'results/results_pokec.pickle', 'wb') as f:
+    # with open('results/results_pokec.pickle', 'wb') as f:
     #     pickle.dump(results4, f)
         
-    # with open(path + 'results/results_pokec_args.pickle', 'wb') as f:
+    # with open('results/results_pokec_args.pickle', 'wb') as f:
     #     pickle.dump(n_pokec, f)

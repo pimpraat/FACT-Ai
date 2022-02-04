@@ -140,6 +140,7 @@ def get_pokec_data(path, path_relationships, colors, probabilities) -> typing.Tu
 
     for item in pokec_data_relationships:
         followers[int(item.split()[0])] += 1
+        followers[int(item.split()[1])] += 1
     
     bmi = np.multiply(np.divide(weight, np.power(height, 2)), 10000)
 
