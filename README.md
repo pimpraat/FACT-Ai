@@ -17,19 +17,16 @@ _All of these notebooks contain only the neccesary calls to produce the results.
 The notebook runs the two synthetic experiments and retrieves saved results for the real datasets. We do not run the real data experiments (by default) because 1) the data is too large to upload it on github and 2) the experiments take a long time
 
 If you want to run the real data experiments, follow the next steps:
-  1. Download the data
-    a) For the Bank dataset, download bank_train.csv: https://www.kaggle.com/gauravduttakiit/portuguese-bank-telemarketing-data
-    b) For the Pokec dataset, download soc-pokec-profilex.txt and soc-pokec-relationships.txt: https://www.kaggle.com/shakeelsial/pokec-full-data-set?select=soc-pokec-profiles.txt
-    2. Rename the files:
-      a) bank_raw.csv
-      b) soc-pokec-profilex.txt, soc-pokec-relationships.txt
-    3. Place the files in FACT-Ai\python implementation\secretary\data
-    4. Open secretary_experiments.py and uncomment all experiments from the run_experiments() method (lines 128-129,137-147)
-    5. Run the secretary_experiments_results.ipynb notebook
-    6. Enjoy our findings!
-
-# Running the C++ code
-To run original c++ representation, run the main.cc file after uncommenting the wanted experiments in the main method. This will print the results in the command line.
+*  1. Download the data
+*    a) For the Bank dataset, download bank_train.csv: https://www.kaggle.com/gauravduttakiit/portuguese-bank-telemarketing-data
+*    b) For the Pokec dataset, download soc-pokec-profilex.txt and soc-pokec-relationships.txt: https://www.kaggle.com/shakeelsial/pokec-full-data-set?select=soc-pokec-profiles.txt
+*    2. Rename the files:
+*      a) bank_raw.csv
+*      b) soc-pokec-profilex.txt, soc-pokec-relationships.txt
+*    3. Place the files in FACT-Ai\python implementation\secretary\data
+*    4. Open secretary_experiments.py and uncomment all experiments from the run_experiments() method (lines 128-129,137-147)
+*    5. Run the secretary_experiments_results.ipynb notebook
+*    6. Enjoy our findings!
 
 # Set up
 To allow for version control of jupyter notebooks, please run:
