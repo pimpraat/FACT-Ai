@@ -1,4 +1,6 @@
 # Introduction
+This is the accompanying repository for the paper "Replication Study of "Fairness and Bias in Online Selection"" as published in ReScience C. This work was part of the ML Reproducibility Challenge 2021 for the course 'Fairness, Accountability, Confidentiality and Transparency in AI' as part of the Msc Artifical Intelligence program at the University of Amsterdam.
+
 The '_python implementation_' folder includes our own Python based implementation in two seperate directories: one for the secretary and one for the prophet implementation.
 
 ## Dependencies
@@ -37,3 +39,6 @@ Having this package installed -- in combination with the jupytext.toml file alre
 To reconstruct a notebook from a .py file, run:
 
 jupytext --to notebook notebook.py
+
+# Contact
+If any questions arise, either with regards to results, implementation or the paper please don't hesistate to contact us.
