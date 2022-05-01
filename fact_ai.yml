@@ -15,5 +15,5 @@ dependencies:
     - scipy
     - dataframe_image
     - ipynb
-    - pickle
     - typing
+    - notebook
