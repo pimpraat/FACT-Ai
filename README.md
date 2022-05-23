@@ -1,5 +1,5 @@
 # Introduction
-This is the accompanying repository for the paper "Replication Study of "Fairness and Bias in Online Selection"" as published in ReScience C. This work was part of the ML Reproducibility Challenge 2021 for the course 'Fairness, Accountability, Confidentiality and Transparency in AI' as part of the Msc Artifical Intelligence program at the University of Amsterdam.
+This is the accompanying repository for the paper "Replication Study of 'Fairness and Bias in Online Selection'" as published in ReScience C. This work was part of the ML Reproducibility Challenge 2021 for the course 'Fairness, Accountability, Confidentiality and Transparency in AI' as part of the Msc Artifical Intelligence program at the University of Amsterdam.
 
 The '_python implementation_' folder includes our own Python based implementation in two seperate directories: one for the secretary and one for the prophet implementation.
 
